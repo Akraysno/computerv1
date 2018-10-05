@@ -1,42 +1,35 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__) + "/utils")
+sys.path.insert(0, os.path.dirname(__file__) + "/class")
 from verif_equation import verif_equation
+from equation import Equation
 
 print ("5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0")
 print ("5 - 4 * X - 9.3 * 9 * -X^2 = -X^0")
 print ("5 + X4 - 9.3X^2 = 1 * X^0")
 
 run = True
+
 while run == True:
-    equation = input("\nEntrez une équation: ").lower()
-    equation = equation.strip(" ")
-    if (equation == "q") or (equation == "quit") or (equation == "exit"):
+    equationInput = input("\nEntrez une équation: ").lower()
+    equationInput = equationInput.strip(" ")
+    if (equationInput == "q") or (equationInput == "quit") or (equationInput == "exit"):
         run = False
         continue
-    equation = equation.replace(' ', '')
-    if (len(equation) == 0):
+    equationInput = equationInput.replace(' ', '')
+    if (len(equationInput) == 0):
         continue
-    if (verif_equation(equation) == False):
+    if (verif_equation(equationInput) == False):
         print ("ERROR: Synthax error")
         continue
     print ("Equation is valide")
+    equation = Equation(0, 0, 0)
+    print("A=", equation.a, "   B=", equation.b, "   C=", equation.c, "   Delta=", equation.delta, "   Roots=", equation.roots())
+    equation = Equation(4, 4, 1)
+    print("A=", equation.a, "   B=", equation.b, "   C=", equation.c, "   Delta=", equation.delta, "   Roots=", equation.roots())
+    equation = Equation(1, 1, 11)
+    print("A=", equation.a, "   B=", equation.b, "   C=", equation.c, "   Delta=", equation.delta, "   Roots=", equation.roots())
+    equation = Equation(2, 10, 2)
+    print("A=", equation.a, "   B=", equation.b, "   C=", equation.c, "   Delta=", equation.delta, "   Roots=", equation.roots())
 
-
-    """
-    # Boucle de verification du formatage de la chaine
-    if verif == "ERROR":
-        run = 0
-        print ("EQUATION PAS VALIDE")
-    elif verif == "OK":
-        print ("EQUATION VALIDE")
-
-    while True:
-        response = raw_input("\nRésoudre une nouvelle équation ? (Y/N): ").lower()
-        if (response == "y") or (response == "yes"):
-            run = 1
-            break
-        if (response == "n") or (response == "q") or (response == "quit") or (response == "non") or (response == "no"):
-            run = 0
-            break
-"""
 print("A la prochaine !")
