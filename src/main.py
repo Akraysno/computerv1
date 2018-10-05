@@ -14,6 +14,8 @@ while run == True:
         run = False
         continue
     equation = equation.replace(' ', '')
+    if (len(equation) == 0):
+        continue
     if (verif_equation(equation) == False):
         print ("ERROR: Synthax error")
         continue
