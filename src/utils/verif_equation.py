@@ -1,11 +1,13 @@
 from brackets import brackets
+from utils import replaceSigns
 
 # return boolean => true no format error
-def verif_equation(equation: str):
+def verifEquation(equation: str):
     if equation.count('=') != 1:
-        print ("\nERROR: Mauvais nombre de '='")
+        print ("SynthaxError: Mauvais nombre de '='")
         return False
+    equation = replaceSigns(equation)
     if brackets(equation) == False:
-        print ("\nERROR: Brackets error")
+        print ("SynthaxError: Brackets error")
         return False
     return True

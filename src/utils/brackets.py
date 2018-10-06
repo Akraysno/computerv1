@@ -1,4 +1,4 @@
-def verif_brackets(string: str, index: int):
+def verifBrackets(string: str, index: int):
     lenStr = len(string)
     i = index
     while i < lenStr:
@@ -22,7 +22,7 @@ def verif_brackets(string: str, index: int):
         i += 1
     return 1
 
-def verif_nb_brackets(string: str):
+def verifNbBrackets(string: str):
     nb_a = 0
     nb_c = 0
     nb_p = 0
@@ -44,6 +44,6 @@ def verif_nb_brackets(string: str):
     return True if (nb_a == 0 and nb_c == 0 and nb_p == 0) else False;
 
 def brackets(string: str):
-    if verif_nb_brackets(string) == False:
+    if verifNbBrackets(string) == False:
         return False
-    return True if verif_brackets(string, 0) == 1 else False
+    return True if verifBrackets(string, 0) == 1 else False

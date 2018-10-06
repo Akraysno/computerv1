@@ -1,7 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(__file__) + "/utils")
 sys.path.insert(0, os.path.dirname(__file__) + "/class")
-from verif_equation import verif_equation
+from verif_equation import verifEquation
 from equation import Equation
 
 print ("5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0")
@@ -19,8 +19,7 @@ while run == True:
     equationInput = equationInput.replace(' ', '')
     if (len(equationInput) == 0):
         continue
-    if (verif_equation(equationInput) == False):
-        print ("ERROR: Synthax error")
+    if (verifEquation(equationInput) == False):
         continue
     print ("Equation is valide")
     equation = Equation(0, 0, 0)
