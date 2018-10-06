@@ -21,7 +21,7 @@ while run == True:
         continue
     if (verifEquation(equationInput) == False):
         continue
-    print ("Equation is valide")
+
     equation = Equation(0, 0, 0)
     print("A=", equation.a, "   B=", equation.b, "   C=", equation.c, "   Delta=", equation.delta, "   Roots=", equation.roots())
     equation = Equation(4, 4, 1)

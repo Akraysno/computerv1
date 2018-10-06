@@ -9,12 +9,25 @@ def authorizeChar(string: str, charList:str):
             return False
     return True
 
+def authorizeCharPosition(string: str):
+    for i in range(0, len(string) - 1):
+        if (string[i] == '^'):
+            if (i == 0) or (i == len(string) - 1) or (string[i - 1].isdigit() == False) or (string[i + 1].isdigit() == False):
+                return False
+        if (string[i] == '*') or (string[i] == '/'):
+            if (i == 0) or (i == len(string) - 1) or (string[i - 1].isdigit() == False) or (string[i - 1] != '(') or (string[i + 1].isdigit() == False) or (string[i + 1] != ')') or (string[i + 1] != '+') or (string[i + 1] != '-'):
+                return False
+        if (string[i] == '+') or (string[i] == '-'):
+            if (i == len(string) - 1) or (string[i + 1].isdigit() == False):
+                return False
+    return True
+
 def replaceSigns(string: str):
     while True:
-        equation = equation.replace('-+', '-')
-        equation = equation.replace('+-', '-')
-        equation = equation.replace('--', '+')
-        equation = equation.replace('++', '+')
-        if (equation.find('-+') == -1) and (equation.find('+-') == -1) and (equation.find('++') == -1) and (equation.find('--') == -1):
+        string = string.replace('-+', '-')
+        string = string.replace('+-', '-')
+        string = string.replace('--', '+')
+        string = string.replace('++', '+')
+        if (string.find('-+') == -1) and (string.find('+-') == -1) and (string.find('++') == -1) and (string.find('--') == -1):
             break
-    return equation
+    return string
