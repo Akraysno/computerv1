@@ -14,7 +14,7 @@ class Equation:
         self.delta = self.getDelta()
 
     def toString(self):
-        return "wip"
+        print('{\n\tA : ',self.a,', B : ',self.b,' , C : ',self.c,'\n\tDelta : ',self.delta,' , Racines : ',self.roots(),'\n}')
 
     def getDelta(self):
         return (math.pow(self.b, 2)) - (4 * self.a * self.c)

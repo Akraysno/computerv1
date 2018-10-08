@@ -14,10 +14,10 @@ def runEquation(equation:str):
 
 def runTests():
     equation = Equation(0, 0, 0)
-    print("A=", equation.a, "   B=", equation.b, "   C=", equation.c, "   Delta=", equation.delta, "   Roots=", equation.roots())
+    equation.toString()
     equation = Equation(4, 4, 1)
-    print("A=", equation.a, "   B=", equation.b, "   C=", equation.c, "   Delta=", equation.delta, "   Roots=", equation.roots())
+    equation.toString()
     equation = Equation(1, 1, 11)
-    print("A=", equation.a, "   B=", equation.b, "   C=", equation.c, "   Delta=", equation.delta, "   Roots=", equation.roots())
+    equation.toString()
     equation = Equation(2, 10, 2)
-    print("A=", equation.a, "   B=", equation.b, "   C=", equation.c, "   Delta=", equation.delta, "   Roots=", equation.roots())
+    equation.toString()
