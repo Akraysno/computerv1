@@ -12,10 +12,14 @@ def authorizeChar(string: str, charList:str):
 def authorizeCharPosition(string: str):
     for i in range(0, len(string) - 1):
         if (string[i] == '^'):
-            if (i == 0) or (i == len(string) - 1) or (string[i - 1].isdigit() == False) or (string[i + 1].isdigit() == False):
+            if (i == 0) or (i == len(string) - 1) or (string[i - 1].isdigit() == False) or (string[i + 1].isdigit() == False) or (string[i + 1] == 'x'):
                 return False
         if (string[i] == '*') or (string[i] == '/'):
-            if (i == 0) or (i == len(string) - 1) or (string[i - 1].isdigit() == False) or (string[i - 1] != '(') or (string[i + 1].isdigit() == False) or (string[i + 1] != ')') or (string[i + 1] != '+') or (string[i + 1] != '-'):
+            if (i == 0) or (i == len(string) - 1):
+                return False
+            if (string[i - 1].isdigit() == False) and (string[i - 1] != 'x') and (string[i - 1] != ')'):
+                return False
+            if (string[i + 1].isdigit() == False) and (string[i + 1] != 'x') and (string[i + 1] != '+') and (string[i + 1] != '-') and (string[i + 1] != '('):
                 return False
         if (string[i] == '+') or (string[i] == '-'):
             if (i == len(string) - 1) or (string[i + 1].isdigit() == False):
