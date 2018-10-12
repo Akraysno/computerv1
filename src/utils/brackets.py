@@ -1,4 +1,4 @@
-def verifBrackets(string: str, index: int):
+def verifBrackets(string: str, index: int, root: bool):
     lenStr = len(string)
     i = index
     while i < lenStr:
@@ -8,7 +8,7 @@ def verifBrackets(string: str, index: int):
                 return 0
             continue
         if string[i] == ')':
-            return i
+            return 0 if (root == True) and (i == 1) else i
         i += 1
     return 1
 
@@ -26,4 +26,4 @@ def verifNbBrackets(string: str):
 def brackets(string: str):
     if verifNbBrackets(string) == False:
         return False
-    return True if verifBrackets(string, 0) == 1 else False
+    return True if verifBrackets(string, 0, True) == 1 else False
