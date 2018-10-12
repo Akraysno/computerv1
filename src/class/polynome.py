@@ -5,7 +5,7 @@ class Polynome:
 
     def __init(self, value, degres):
         self.degres = degres
-        self.value = values
+        self.value = value
 
     def add(self, polynome: Polynome):
         if (self.degres == polynome.degres):
