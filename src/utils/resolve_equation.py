@@ -5,6 +5,18 @@ def resolveEquation(equation:str):
     member_right = resolveMember(equation_right, 0)
 
 #return Equation()
+#parse member and add parentheses aroud ^ * and /
+"""
+Si char 
+    parse vers l'arriere et l'avant jusqu'a tomber sur un operateur
+    si parenthese, evite tous les caracteres a l'interieur
+parse member (mode: brackets)
+    complete inline equation (mode: )
+parse inline and reduct
+merge inlines
+reduct merge
+resolve merge
+"""
 def resolveMember(member:str, index: int):
     lenStr = len(member)
     i = index
