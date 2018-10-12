@@ -1,7 +1,7 @@
 def authorizeChar(string: str, charList:str):
-    for i in range(0, len(string) - 1):
+    for i in range(0, len(string)):
         validChar = False
-        for j in range(0, len(charList) -1):
+        for j in range(0, len(charList)):
             if (validChar == False) and string[i] == charList[j]:
                 validChar = True
                 break
@@ -10,7 +10,7 @@ def authorizeChar(string: str, charList:str):
     return True
 
 def authorizeCharPosition(string: str):
-    for i in range(0, len(string) - 1):
+    for i in range(0, len(string)):
         if (string[i] == '^'):
             if (i == 0) or (i == len(string) - 1) or (string[i - 1].isdigit() == False) or (string[i + 1].isdigit() == False) or (string[i + 1] == 'x'):
                 return False
