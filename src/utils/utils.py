@@ -36,3 +36,10 @@ def replaceSigns(string: str):
         if (string.find('-+') == -1) and (string.find('+-') == -1) and (string.find('++') == -1) and (string.find('--') == -1):
             break
     return string
+
+def check_for_x(member: str, index: int):
+    if (i > 0) and (member[i - 1].isdigit()):
+        member = replace_str(member, i, i + 1, "*x")
+    elif (i < len(member) - 1) and (member[i + 1].isdigit()):
+        member = replace_str(member, i, i + 1, "x*")
+    return member

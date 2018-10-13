@@ -2,14 +2,15 @@ from brackets import brackets
 from utils import authorizeChar
 from utils import replaceSigns
 from utils import authorizeCharPosition
+from utils import check_for_x
 
 def verifEquation(equation: str):
     if equation.count('=') != 1:
         print("SynthaxError: Mauvais nombre de '='")
         return False
     equation = replaceSigns(equation)
-    equation_left = equation[0:equation.find('=')]
-    equation_right = equation[equation.find('=') + 1: len(equation)]
+    equation_left = check_for_x(equation[0:equation.find('=')])
+    equation_right = check_for_x(equation[equation.find('=') + 1: len(equation)])
     if (len(equation_left) == 0) or (len(equation_right) ==0):
         print("SyntaxError: Half equation missing")
         return False
