@@ -22,7 +22,6 @@ try:
         signal.signal(signal.SIGINT, signal_handler)
         equationInput = input("\nEntrez une équation: ")
         equationInput = equationInput.lower().strip(" ")
-        print(equationInput)
         if (equationInput == "q") or (equationInput == "quit") or (equationInput == "exit"):
             exit()
         elif (equationInput == "t") or (equationInput == "test"):

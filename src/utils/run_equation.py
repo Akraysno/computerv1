@@ -1,16 +1,29 @@
 import sys, os
-sys.path.insert(0, os.path.dirname(__file__) + "/utils")
-sys.path.insert(0, os.path.dirname(__file__) + "/class")
+sys.path.insert(0, os.path.dirname(__file__) + "/../utils")
+sys.path.insert(0, os.path.dirname(__file__) + "/../class")
 from verif_equation import verifEquation
 from equation import Equation
-from resolve_equation import resolveEquation
+from utils import check_for_x
+from utils import replaceSigns
+
+def treat_member(member: str):
+    print("member : ", member)
+
+def resolve_equation(equation: str):
+    equation_left = equation[0:equation.find('=')]
+    equation_right = equation[equation.find('=') + 1: len(equation)]
+    treat_member(equation_left)
+    treat_member(equation_right)
 
 def runEquation(equation:str):
     equation = equation.replace(' ', '')
     if (len(equation) == 0):
         return
+    equation = replaceSigns(equation)
+    equation = check_for_x(equation)
     if (verifEquation(equation) == False):
         return
+    resolve_equation(equation)
 
 def runTests():
     equation = Equation(0, 0, 0)

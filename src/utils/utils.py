@@ -37,9 +37,14 @@ def replaceSigns(string: str):
             break
     return string
 
-def check_for_x(member: str, index: int):
-    if (i > 0) and (member[i - 1].isdigit()):
-        member = replace_str(member, i, i + 1, "*x")
-    elif (i < len(member) - 1) and (member[i + 1].isdigit()):
-        member = replace_str(member, i, i + 1, "x*")
+def replace_str(text:str, start_index:int, length: int, replacement:str = ''):
+    return '%s%s%s'%(text[:start_index],replacement,text[start_index+length:])
+
+def check_for_x(member: str):
+    for i in range(0, len(member) - 1):
+        if member[i] == 'x':
+            if (i > 0) and (member[i - 1].isdigit()):
+                member = replace_str(member, i, i + 1, "*x")
+            elif (i < len(member) - 1) and (member[i + 1].isdigit()):
+                member = replace_str(member, i, 1, "x*")
     return member
