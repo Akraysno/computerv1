@@ -16,7 +16,7 @@ def verifEquation(equation: str):
     if (brackets(equation_left) == False) or (brackets(equation_right) == False):
         print("SynthaxError: Brackets error")
         return False
-    if (authorizeChar(equation_left, "0123456789+-*/^()x") == False) or (authorizeChar(equation_right, "0123456789+-*/^") == False):
+    if (authorizeChar(equation_left) == False) or (authorizeChar(equation_right) == False):
         print("SynthaxError: Forbidden character")
         return False
     if (authorizeCharPosition(equation_left) == False) or (authorizeCharPosition(equation_right) == False):

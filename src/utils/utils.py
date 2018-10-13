@@ -1,4 +1,5 @@
-def authorizeChar(string: str, charList:str):
+def authorizeChar(string: str):
+    charList = "0123456789+-*/^x"
     for i in range(0, len(string)):
         validChar = False
         for j in range(0, len(charList)):
@@ -17,9 +18,9 @@ def authorizeCharPosition(string: str):
         if (string[i] == '*') or (string[i] == '/'):
             if (i == 0) or (i == len(string) - 1):
                 return False
-            if (string[i - 1].isdigit() == False) and (string[i - 1] != 'x') and (string[i - 1] != ')'):
+            if (string[i - 1].isdigit() == False) and (string[i - 1] != 'x'):
                 return False
-            if (string[i + 1].isdigit() == False) and (string[i + 1] != 'x') and (string[i + 1] != '+') and (string[i + 1] != '-') and (string[i + 1] != '('):
+            if (string[i + 1].isdigit() == False) and (string[i + 1] != 'x') and (string[i + 1] != '+'):
                 return False
         if (string[i] == '+') or (string[i] == '-'):
             if (i == len(string) - 1) or (string[i + 1].isdigit() == False):
