@@ -39,3 +39,19 @@ class Equation:
             return - self.c / self.b
         else :
             return self.c
+
+    def add(op1, op2):
+        print(op1 + op2, type(op1), type(op2))
+        return Equation(0, 0, 0)
+
+    def sub(op1, op2):
+        print(op1 + op2, type(op1), type(op2))
+        return Equation(0, 0, 0)
+
+    def mul(op1, op2):
+        print(op1 + op2, type(op1), type(op2))
+        return Equation(0, 0, 0)
+
+    def div(op1, op2):
+        print(op1 + op2, type(op1), type(op2))
+        return Equation(0, 0, 0)
