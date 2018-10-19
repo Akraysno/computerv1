@@ -48,3 +48,23 @@ def check_for_x(member: str):
             elif (i < len(member) - 1) and (member[i + 1].isdigit()):
                 member = replace_str(member, i, 1, "x*")
     return member
+
+def atoi(string:str):
+    sign = 1
+    i = 0
+    if string[0] == '-':
+        sign = -1
+        i = 1
+
+    if string[0] == '+':
+        sign = 1
+        i = 1
+
+    num = 0
+    while i < len(string):
+        if '0' <= string[i] <= '9':
+            num = num * 10 + ord(string[i]) - ord('0')
+        else:
+            break
+        i += 1
+    return num * sign

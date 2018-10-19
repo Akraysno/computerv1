@@ -1,5 +1,5 @@
 import math
-
+from polynome import Polynome
 class Equation:
     # Ax² + Bx + C
     a = 0

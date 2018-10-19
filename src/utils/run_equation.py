@@ -3,12 +3,14 @@ from verif_equation import verifEquation
 from equation import Equation
 from utils import check_for_x
 from utils import replaceSigns
+from polynome import Polynome
 
 #http://andreinc.net/2010/10/05/converting-infix-to-rpn-shunting-yard-algorithm/
 def eval_expression(expression):
     tokens = expression.split()
-    infixToRPN(tokens)
-    return infixToRPN(tokens)
+    rpn = infixToRPN(tokens)
+    equation = RPNToEquation(rpn)
+    return equation
 
 
 """
@@ -136,3 +138,9 @@ def infixToRPN(tokens):
         # [S13]
         out.append(stack.pop())
     return out
+
+def RPNToEquation(rpn):
+    for token in rpn:
+        poly = Polynome(token)
+        print(poly.toString())
+    return rpn
