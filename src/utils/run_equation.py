@@ -1,23 +1,17 @@
-import sys, os
-sys.path.insert(0, os.path.dirname(__file__) + "/../utils")
-sys.path.insert(0, os.path.dirname(__file__) + "/../class")
+import sys
 from verif_equation import verifEquation
 from equation import Equation
 from utils import check_for_x
 from utils import replaceSigns
-import operator
 
-ops = { '+': operator.add,
-        '-': operator.sub,
-        '*': operator.mul,
-        '/': operator.truediv
-}
 #http://andreinc.net/2010/10/05/converting-infix-to-rpn-shunting-yard-algorithm/
 def eval_expression(expression):
-    expression = " 4 2 +"
     tokens = expression.split()
-    stack = []
+    infixToRPN(tokens)
+    return infixToRPN(tokens)
 
+
+"""
     for token in tokens:
         if token in ops:
             arg2 = stack.pop()
@@ -26,17 +20,16 @@ def eval_expression(expression):
             stack.append(result)
         else:
             stack.append(int(token))
-
     return stack.pop()
+"""
 
 def treat_member(member: str):
     member = member.replace('*', ' * ')
     member = member.replace('/', ' / ')
     member = member.replace('+', ' + ')
     member = member.replace('-', ' - ')
-    print("member : ", member)
     stack = eval_expression(member)
-    print(stack)
+    print("member", stack)
 
 def resolve_equation(equation: str):
     equation_left = equation[0:equation.find('=')]
@@ -49,12 +42,15 @@ def runEquation(equation:str):
     if (len(equation) == 0):
         return
     equation = replaceSigns(equation)
+    print("Replaced", equation)
     equation = check_for_x(equation)
+    print("Checked", equation)
     if (verifEquation(equation) == False):
         return
     resolve_equation(equation)
 
 def runTests():
+    """
     equation = Equation(0, 0, 0)
     equation.toString()
     equation = Equation(4, 4, 1)
@@ -63,13 +59,80 @@ def runTests():
     equation.toString()
     equation = Equation(2, 10, 2)
     equation.toString()
-    sys.stdout.write("\n= : ")
+    print("\n= : ")
     runEquation("=")
-    sys.stdout.write("\n3= : ")
+    print("\n3= : ")
     runEquation("3=")
-    sys.stdout.write("\n=3 : ")
+    print("\n=3 : ")
     runEquation("=3")
-    sys.stdout.write("\nx=3 : ")
+    print("\nx=3 : ")
     runEquation("x=3")
-    sys.stdout.write("\n3x + 2 = 0 : ")
+    print("\n3x + 2 = 0 : ")
     runEquation("3x + 2 = 0")
+    """
+    print("\n3x^2 + 2 - x5 = 0 : ")
+    runEquation("3x^2 + 2 - 5 * x = 0")
+
+
+#Associativity constants for operators
+LEFT_ASSOC = 0
+RIGHT_ASSOC = 1
+ 
+#Supported operators
+OPERATORS = {
+    '+' : (0, LEFT_ASSOC),
+    '-' : (0, LEFT_ASSOC),
+    '*' : (5, LEFT_ASSOC),
+    '/' : (5, LEFT_ASSOC),
+    '%' : (5, LEFT_ASSOC),
+    '^' : (10, RIGHT_ASSOC)
+}
+ 
+#Test if a certain token is operator
+def isOperator(token):
+    return token in OPERATORS.keys()
+ 
+#Test the associativity type of a certain token
+def isAssociative(token, assoc):
+    if not isOperator(token):
+        raise ValueError('Invalid token: %s' % token)
+    return OPERATORS[token][1] == assoc
+ 
+#Compare the precedence of two tokens
+def cmpPrecedence(token1, token2):
+    if not isOperator(token1) or not isOperator(token2):
+        raise ValueError('Invalid tokens: %s %s' % (token1, token2))
+    return OPERATORS[token1][0] - OPERATORS[token2][0]
+
+    #Transforms an infix expression to RPN
+def infixToRPN(tokens):
+    out = []
+    stack = []
+    #For all the input tokens [S1] read the next token [S2]
+    for token in tokens:
+        if isOperator(token):
+            # If token is an operator (x) [S3]
+            while len(stack) != 0 and isOperator(stack[-1]):
+                # [S4]
+                if (isAssociative(token, LEFT_ASSOC)
+                    and cmpPrecedence(token, stack[-1]) <= 0) or (isAssociative(token, RIGHT_ASSOC)
+                    and cmpPrecedence(token, stack[-1]) < 0):
+                    # [S5] [S6]
+                    out.append(stack.pop())
+                    continue
+                break
+            # [S7]
+            stack.append(token)
+        elif token == '(':
+            stack.append(token) # [S8]
+        elif token == ')':
+            # [S9]
+            while len(stack) != 0 and stack[-1] != '(':
+                out.append(stack.pop()) # [S10]
+            stack.pop() # [S11]
+        else:
+            out.append(token) # [S12]
+    while len(stack) != 0:
+        # [S13]
+        out.append(stack.pop())
+    return out
