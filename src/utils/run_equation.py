@@ -5,25 +5,13 @@ from utils import check_for_x
 from utils import replaceSigns
 from polynome import Polynome
 
-#http://andreinc.net/2010/10/05/converting-infix-to-rpn-shunting-yard-algorithm/
+
 def eval_expression(expression):
     tokens = expression.split()
+    print(tokens)
     rpn = infixToRPN(tokens)
     equation = RPNToEquation(rpn)
     return equation
-
-
-"""
-    for token in tokens:
-        if token in ops:
-            arg2 = stack.pop()
-            arg1 = stack.pop()
-            result = ops[token](arg1, arg2)
-            stack.append(result)
-        else:
-            stack.append(int(token))
-    return stack.pop()
-"""
 
 def treat_member(member: str):
     member = member.replace('*', ' * ')
@@ -31,7 +19,6 @@ def treat_member(member: str):
     member = member.replace('+', ' + ')
     member = member.replace('-', ' - ')
     stack = eval_expression(member)
-    print("member", stack)
 
 def resolve_equation(equation: str):
     equation_left = equation[0:equation.find('=')]
@@ -44,9 +31,7 @@ def runEquation(equation:str):
     if (len(equation) == 0):
         return
     equation = replaceSigns(equation)
-    print("Replaced", equation)
     equation = check_for_x(equation)
-    print("Checked", equation)
     if (verifEquation(equation) == False):
         return
     resolve_equation(equation)
@@ -86,8 +71,6 @@ OPERATORS = {
     '-' : (0, LEFT_ASSOC),
     '*' : (5, LEFT_ASSOC),
     '/' : (5, LEFT_ASSOC),
-    '%' : (5, LEFT_ASSOC),
-    '^' : (10, RIGHT_ASSOC)
 }
  
 #Test if a certain token is operator
@@ -140,7 +123,44 @@ def infixToRPN(tokens):
     return out
 
 def RPNToEquation(rpn):
+    print("rpn", rpn)
+    stack = []
+    secondStack = []
+
+    #replace numbers by Polynomes
+    """
     for token in rpn:
-        poly = Polynome(token)
-        print(poly.toString())
+        if (isOperator(token)):
+            stack.append(token)
+        else:
+            stack.append(Polynome(token, 0, 0))
+    """
+    #do operations
+    for token in rpn:
+        if (isOperator(token)):
+            arg1 = rpn.pop()
+            arg2 = rpn.pop()
+            print(rpn)
+            print(arg1, token, arg2)
+            """
+            if (token == '+'):
+                res = arg1.add(arg2)
+            if (token == '*'):
+                res = arg1.mul(arg2)
+            if (token == '-'):
+                res = arg1.sub(arg2)
+            if (token == '/'):
+                res = arg1.div(arg2)
+            
+            if (res == False):
+                print(False)
+                secondStack.append(arg1)
+                secondStack.append(arg2)
+                secondStack.append(token)
+            else:
+                print(res)
+                stack.append(res)
+            """
+        else:
+            rpn.append(token)
     return rpn
