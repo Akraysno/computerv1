@@ -13,7 +13,7 @@ def authorizeChar(string: str):
 def authorizeCharPosition(string: str):
     for i in range(0, len(string)):
         if (string[i] == '^'):
-            if (i == 0) or (i == len(string) - 1) or (string[i - 1].isdigit() == False) or (string[i + 1].isdigit() == False) or (string[i + 1] == 'x'):
+            if (i == 0) or (i == len(string) - 1) or (string[i + 1].isdigit() == False) or (string[i - 1] != 'x'):
                 return False
         if (string[i] == '*') or (string[i] == '/'):
             if (i == 0) or (i == len(string) - 1):
@@ -44,7 +44,7 @@ def check_for_x(member: str):
     for i in range(0, len(member) - 1):
         if member[i] == 'x':
             if (i > 0) and (member[i - 1].isdigit()):
-                member = replace_str(member, i, i + 1, "*x")
+                member = replace_str(member, i, i , "*x")
             elif (i < len(member) - 1) and (member[i + 1].isdigit()):
                 member = replace_str(member, i, 1, "x*")
     return member

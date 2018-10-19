@@ -3,7 +3,7 @@ class Polynome:
     degres = 1
     value = 0
 
-    def __init(self, value, degres):
+    def __init__(self, value, degres):
         self.degres = degres
         self.value = value
 
