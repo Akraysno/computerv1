@@ -1,10 +1,10 @@
 from utils import atoi
 
 class Polynome:
-    degres = 1
-    value = 0
+    values = []
 
-    def __init__(self, raw:str, value:int, degres:int):
+    def __init__(self, raw:str):
+        self.values = []
         if len(raw) > 0:
             value:int = 0
             degres:int = 0
@@ -15,45 +15,48 @@ class Polynome:
                     i = 1
                 if raw[0] == '+':
                     i = 1
+                tempI = i
                 while i < len(raw):
                     if '0' <= raw[i] <= '9':
                         i += 1
                     else:
                         break
+                if tempI == i:
+                    value = 1
                 raw = raw[i:]
                 if len(raw) > 0:
                     if raw[0] == 'x':
+                        degres = 1
                         if len(raw) > 1:
-                            value = value if value != 0 else 1
+                            #value = value if value != 0 else 1
                             if raw[1] == '^':
                                 degres = atoi(raw[2:])
                             else:
                                 value = value * atoi(raw[1:]) if value != 0 else atoi(raw[1:])
-            self.degres = degres
-            self.value = value
-        else:
-            self.value = value
-            self.degres = degres
+            length = len(self.values)
+            if length < degres + 1:
+                for j in range(length, degres + 1):
+                    self.values.append(0)
+            self.values[degres] += value
+
+    def __repr__(self):
+        return self.toString()
 
     def toString(self):
-        print('{\n\tdegres : ',self.degres,'\n\tvalue : ', self.value, '\n}')
-
-    def add(self, polynome):
-        print("add", polynome.degres, polynome.value)
-        if (self.degres == polynome.degres):
-            return Polynome("", self.value + polynome.value, self.degres)
-        return False
-
-    def sub(self, polynome):
-        print("sub", polynome.degres, polynome.value)
-        if (self.degres == polynome.degres):
-            return Polynome("", self.value - polynome.value, self.degres)
-        return False
-
-    def mul(self, polynome):
-        print("mul", polynome.degres, polynome.value)
-        return Polynome("", self.value * polynome.value, self.degres + polynome.degres)
-
-    def div(self, polynome):
-        print("div", polynome.degres, polynome.value)
-        return Polynome("", self.value / polynome.value, self.degres - polynome.degres)
+        length = len(self.values)
+        equation = ""
+        for i in range(length - 1, -1, -1):
+            value = self.values[i]
+            if value != 0:
+                if len(equation) > 0:
+                    if value >= 0:
+                        equation += " + "
+                    else:
+                        equation += " - "
+                        value *= -1
+                equation += str(value)
+                if i != 0:
+                    equation += "x"
+                    if i != 1:
+                        equation += "^"+str(i)
+        return equation
