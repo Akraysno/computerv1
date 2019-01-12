@@ -12,6 +12,7 @@ def isOperator(token):
 class Equation:
     # [c, b, a]
     values = []
+    operations = {}
     equation = ""
     equationElements = []
 
@@ -19,6 +20,12 @@ class Equation:
         self.values = []
         self.equation = ""
         self.equationElements = []
+        self.operations = {
+            '+': lambda eq1, eq2: eq1.add(eq2),
+            '*': lambda eq1, eq2: eq1.mul(eq2),
+            '/': lambda eq1, eq2: eq1.div(eq2),
+            '-': lambda eq1, eq2: eq1.sub(eq2),
+        }
         equation = ""
         values = []
         if (kwargs.get("equation")):
@@ -102,14 +109,7 @@ class Equation:
                 if isOperator(formattedElems[i]):
                     if (formattedElems[i] == "*") or (formattedElems[i] == "/") or (mulDivOpe == False):
                         currentOpe = formattedElems[i - 1 : i + 2 : 1]
-                        if currentOpe[1] == "*":
-                            formattedElems[i - 1] = currentOpe[0].mul(currentOpe[2])
-                        elif currentOpe[1] == "/":
-                            formattedElems[i - 1] = currentOpe[0].div(currentOpe[2])
-                        elif currentOpe[1] == "+":
-                            formattedElems[i - 1] = currentOpe[0].add(currentOpe[2])
-                        elif currentOpe[1] == "-":
-                            formattedElems[i - 1] = currentOpe[0].sub(currentOpe[2])
+                        formattedElems[i - 1] = self.operations[currentOpe[1]](currentOpe[0], currentOpe[2])
                         del formattedElems[i:i + 2]
                         break
             if printSteps == True:
