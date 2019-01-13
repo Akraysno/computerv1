@@ -39,16 +39,19 @@ def replaceSigns(string: str):
             break
     return string
 
-def replace_str(text:str, start_index:int, length: int, replacement:str = ''):
-    return '%s%s%s'%(text[:start_index],replacement,text[start_index+length:])
+def replace_str(text:str, start_index:int, lengthToReplace: int, replacement:str = ''):
+    return text[0:start_index] + replacement + text[start_index + lengthToReplace:]
 
 def checkForX(member: str):
-    for i in range(0, len(member) - 1):
+    i = 0
+    while i < len(member) - 1:
         if member[i] == 'x':
             if (i > 0) and (member[i - 1].isdigit()):
-                member = replace_str(member, i, i , "*x")
+                member = replace_str(member, i, 1, "*x")
+                i = i - 1
             elif (i < len(member) - 1) and (member[i + 1].isdigit()):
                 member = replace_str(member, i, 1, "x*")
+        i += 1
     return member
 
 def atoi(string:str):

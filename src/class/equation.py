@@ -14,6 +14,8 @@ OPERATORS = ['+', '-', '*', '/']
 def isOperator(token):
     return token in OPERATORS
 
+
+# TODO fix values for x^-n
 class Equation:
     # [c, b, a]
     operations = {}
@@ -33,8 +35,8 @@ class Equation:
         self.equation = self.__verifyCharPosition(equation)
         self.__equationMemberLeft = self.equation[0:self.equation.find('=')]
         self.__equationMemberRight = self.equation[self.equation.find('=') + 1: len(self.equation)]
-        self.__valuesMemberLeft = self.simplifyMember(self.__equationMemberLeft)
-        self.__valuesMemberRight = self.simplifyMember(self.__equationMemberRight)
+        self.__valuesMemberLeft = self.__simplifyMember(self.__equationMemberLeft)
+        self.__valuesMemberRight = self.__simplifyMember(self.__equationMemberRight)
         self.__valuesMemberLeft = self.operations['-'](self.__valuesMemberLeft, self.__valuesMemberRight)
         self.__valuesMemberRight = [0]
     
@@ -42,7 +44,6 @@ class Equation:
         return self.__toString(self.__valuesMemberLeft) + " = " + self.__toString(self.__valuesMemberRight)
 
     def __toString(self, values):
-        print(values)
         length = len(values)
         equation = ""
         for i in range(length - 1, -1, -1):
@@ -115,7 +116,7 @@ class Equation:
 
     def __transformEquation(self, equation: str):
         # Remove spaces
-        equation = equation.strip(' ')
+        equation = equation.replace(' ', '')
         # Replace and remove signs [+|-]
         equation = replaceSigns(equation)
         # Add * around x
@@ -157,7 +158,7 @@ class Equation:
             values[degres] += value
         return values
 
-    def simplifyMember(self, equation):
+    def __simplifyMember(self, equation):
         if len(equation) > 0:
             eq = equation
             # Split equation
@@ -194,32 +195,59 @@ class Equation:
                             formattedElems[i - 1] = self.operations[currentOpe[1]](currentOpe[0], currentOpe[2])
                             del formattedElems[i:i + 2]
                             break
-                print("Step :", formattedElems)
+                form = ""
+                for elem in formattedElems:
+                    if isOperator(elem) == True:
+                        form += elem
+                    else:
+                        form += self.__toString(elem) 
+                print("Step :", form)
             return formattedElems[0]
 
     def getDelta(self):
-        return (math.pow(self.b, 2)) - (4 * self.a * self.c)
+        print(math.pow(self.__valuesMemberLeft[1], 2))
+        print(4 * self.__valuesMemberLeft[2] * self.__valuesMemberLeft[0])
+        return (math.pow(self.__valuesMemberLeft[1], 2)) - (4 * self.__valuesMemberLeft[2] * self.__valuesMemberLeft[0])
 
+    def resolve(self):
+        self.__valuesMemberLeft
+        lenVal = len(self.__valuesMemberLeft)
+        degre = lenVal - 1
+        if degre > 2:
+            raise ValueError('Polynome de degré ' + str(degre) + '. Polynome de degré 2 maximum')
+        for k in range(lenVal, 2):
+            self.__valuesMemberLeft.append(0)
+        delta = self.getDelta()
+        print("A :", str(self.__valuesMemberLeft[2]), ", B :", str(self.__valuesMemberLeft[1]), ", C :", str(self.__valuesMemberLeft[0]))
+        print("Delta : " + str(delta))
+        roots = self.roots()
+        print("Racines : ", roots)
+        
     def roots(self):
-        if self.a != 0:
-            if self.delta > 0:
-                root_one = (- self.b - math.sqrt(self.delta)) / (2 * self.a)
-                root_two = (- self.b + math.sqrt(self.delta)) / (2 * self.a)
+        values = self.__valuesMemberLeft
+        a = values[2]
+        b = values[1]
+        c = values[0]
+        delta = self.getDelta()
+        if a != 0:
+            if delta > 0:
+                root_one = (- b - math.sqrt(delta)) / (2 * a)
+                root_two = (- b + math.sqrt(delta)) / (2 * a)
                 return [root_one, root_two]
-            if self.delta == 0:
-                return (- self.b) / (2 * self.a)
-            if self.delta < 0:
-                part_one = (- self.b ) / (2 * self.a)
-                part_two = (math.sqrt(math.fabs(self.delta))) / (2 * self.a)
+            if delta == 0:
+                return (- b) / (2 * a)
+            if delta < 0:
+                part_one = (- b ) / (2 * a)
+                part_two = (math.sqrt(math.fabs(delta))) / (2 * a)
                 root_one_part_two_sign = " + " if (part_two < 0) else " - "
                 root_two_part_two_sign = " - " if (part_two < 0) else " + "
                 root_one = str(part_one) + root_one_part_two_sign + str(math.fabs(part_two)) +"i"
                 root_two = str(part_one) + root_two_part_two_sign + str(math.fabs(part_two)) +"i"
                 return [root_one, root_two]
-        elif self.b != 0:
-            return - self.c / self.b
+        elif b != 0:
+            return - c / b
         else :
-            return self.c
+            return c
 
     def add(self, src, dest):
         lenSrc = len(src)
