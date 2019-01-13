@@ -17,6 +17,7 @@ def exit():
     print("A la prochaine !")
     os._exit(0)
 
+#Add "man" and "help" command
 try:
     while True:
         signal.signal(signal.SIGINT, signal_handler)

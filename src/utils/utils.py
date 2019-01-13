@@ -33,14 +33,16 @@ def replaceSigns(string: str):
         string = string.replace('+-', '-')
         string = string.replace('--', '+')
         string = string.replace('++', '+')
-        if (string.find('-+') == -1) and (string.find('+-') == -1) and (string.find('++') == -1) and (string.find('--') == -1):
+        string = string.replace('*+', '*')
+        string = string.replace('/+', '/')
+        if (string.find('-+') == -1) and (string.find('+-') == -1) and (string.find('++') == -1) and (string.find('--') == -1) and (string.find('*+') == -1) and (string.find('/+') == -1):
             break
     return string
 
 def replace_str(text:str, start_index:int, length: int, replacement:str = ''):
     return '%s%s%s'%(text[:start_index],replacement,text[start_index+length:])
 
-def check_for_x(member: str):
+def checkForX(member: str):
     for i in range(0, len(member) - 1):
         if member[i] == 'x':
             if (i > 0) and (member[i - 1].isdigit()):
@@ -68,3 +70,10 @@ def atoi(string:str):
             break
         i += 1
     return num * sign
+
+def find_nth_overlapping(haystack, needle, n):
+    start = haystack.find(needle)
+    while start >= 0 and n > 1:
+        start = haystack.find(needle, start+1)
+        n -= 1
+    return start

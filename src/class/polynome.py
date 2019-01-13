@@ -11,9 +11,7 @@ class Polynome:
             i:int = 0
             if (len(raw) > 0):
                 value = atoi(raw)
-                if raw[0] == '-':
-                    i = 1
-                if raw[0] == '+':
+                if raw[0] == '-' or raw[0] == '+':
                     i = 1
                 tempI = i
                 while i < len(raw):

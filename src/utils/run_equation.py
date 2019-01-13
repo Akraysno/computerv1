@@ -1,7 +1,7 @@
 import sys
 from verif_equation import verifEquation
 from equation import Equation
-from utils import check_for_x
+from utils import checkForX
 from utils import replaceSigns
 from polynome import Polynome
 
@@ -54,14 +54,20 @@ def resolve_equation(equation: str):
     
 
 def runEquation(equation:str):
-    equation = equation.replace(' ', '')
+    try:
+        eq = Equation(equation=equation)
+    except ValueError as err:
+        print("Error : " + err.args[0])
+    """
+    equation = equation.strip(' ')
     if (len(equation) == 0):
         return
     equation = replaceSigns(equation)
-    equation = check_for_x(equation)
+    equation = checkForX(equation)
     if (verifEquation(equation) == False):
         return
     resolve_equation(equation)
+    """
 
 def runTests():
     """

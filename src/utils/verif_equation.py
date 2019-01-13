@@ -1,7 +1,7 @@
 from utils import authorizeChar
 from utils import replaceSigns
 from utils import authorizeCharPosition
-from utils import check_for_x
+from utils import checkForX
 
 def verifEquation(equation: str):
     if equation.count('=') != 1:
