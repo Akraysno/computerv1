@@ -1,6 +1,5 @@
 import math
 import re
-from polynome import Polynome
 from utils import atoi
 from utils import checkForX
 from utils import authorizeChar
@@ -17,42 +16,33 @@ def isOperator(token):
 
 class Equation:
     # [c, b, a]
-    values = []
     operations = {}
     equation = ""
-
     __valuesMemberLeft = []
     __valuesMemberRight = []
     __equationMemberLeft = ""
     __equationMemberRight = ""
 
-    def __init__(self, *args, **kwargs):
-        self.values = []
-        self.equation = ""
+    def __init__(self, equation:str):
         self.operations = {
-            '+': lambda eq1, eq2: eq1.add(eq2),
-            '*': lambda eq1, eq2: eq1.mul(eq2),
-            '/': lambda eq1, eq2: eq1.div(eq2),
-            '-': lambda eq1, eq2: eq1.sub(eq2),
+            '+': lambda src, dest: self.add(src, dest),
+            '*': lambda src, dest: self.mul(src, dest),
+            '/': lambda src, dest: self.div(src, dest),
+            '-': lambda src, dest: self.sub(src, dest),
         }
-        equation = ""
-        values = []
-        if (kwargs.get("equation")):
-            self.equation = self.__verifyCharPosition(kwargs.get("equation"))
-            self.__equationMemberLeft = self.equation[0:self.equation.find('=')]
-            self.__equationMemberRight = self.equation[self.equation.find('=') + 1: len(self.equation)]
-        elif (kwargs.get("polynome")):
-            polynome = kwargs.get("polynome")
-            values = (lambda polynome: polynome.values)(polynome)
-            values = (lambda polynome: polynome.values)(polynome)
-
-        self.equation = equation
-        self.values = values
-
+        self.equation = self.__verifyCharPosition(equation)
+        self.__equationMemberLeft = self.equation[0:self.equation.find('=')]
+        self.__equationMemberRight = self.equation[self.equation.find('=') + 1: len(self.equation)]
+        self.__valuesMemberLeft = self.simplifyMember(self.__equationMemberLeft)
+        self.__valuesMemberRight = self.simplifyMember(self.__equationMemberRight)
+        self.__valuesMemberLeft = self.operations['-'](self.__valuesMemberLeft, self.__valuesMemberRight)
+        self.__valuesMemberRight = [0]
+    
     def __repr__(self):
         return self.__toString(self.__valuesMemberLeft) + " = " + self.__toString(self.__valuesMemberRight)
 
     def __toString(self, values):
+        print(values)
         length = len(values)
         equation = ""
         for i in range(length - 1, -1, -1):
@@ -69,6 +59,8 @@ class Equation:
                     equation += "x"
                     if i != 1:
                         equation += "^"+str(i)
+            elif value == 0 and length == 1:
+                equation += str(value)
         return equation
 
     def __verifyCharPosition(self, equation:str):
@@ -100,7 +92,6 @@ class Equation:
         #verify char positions, x can be placed anywhere
         maxLen = len(equation)
         for i in range(0, maxLen):
-            print(i, equation[i], equation[i:])            
             if (i == 0) and (find_nth_overlapping("-+0123456789x", equation[i], 1) == -1):
                 raise ValueError('Synthax error at char ' + str(i))
             if (equation[i] == '^') and ((i == 0) or re.search('^(\^[\-|+|\s]*[0-9]+)', equation[i:]) == None):
@@ -122,7 +113,7 @@ class Equation:
         
         return self.__transformEquation(equation)
 
-    def __transformEquation(self, equation):
+    def __transformEquation(self, equation: str):
         # Remove spaces
         equation = equation.strip(' ')
         # Replace and remove signs [+|-]
@@ -131,9 +122,44 @@ class Equation:
         equation = checkForX(equation)
         return equation
 
-    def simplify(self, printSteps: bool):
-        if len(self.equation) > 0:
-            eq = self.equation
+    def __transformElementToValues(self, element: str):
+        values = []
+        if len(element) > 0:
+            value:int = 0
+            degres:int = 0
+            i:int = 0
+            if (len(element) > 0):
+                value = atoi(element)
+                if element[0] == '-' or element[0] == '+':
+                    i = 1
+                tempI = i
+                while i < len(element):
+                    if '0' <= element[i] <= '9':
+                        i += 1
+                    else:
+                        break
+                if tempI == i:
+                    value = 1
+                element = element[i:]
+                if len(element) > 0:
+                    if element[0] == 'x':
+                        degres = 1
+                        if len(element) > 1:
+                            #value = value if value != 0 else 1
+                            if element[1] == '^':
+                                degres = atoi(element[2:])
+                            else:
+                                value = value * atoi(element[1:]) if value != 0 else atoi(element[1:])
+            length = len(values)
+            if length < degres + 1:
+                for j in range(length, degres + 1):
+                    values.append(0)
+            values[degres] += value
+        return values
+
+    def simplifyMember(self, equation):
+        if len(equation) > 0:
+            eq = equation
             # Split equation
             for operator in OPERATORS:
                 eq = eq.replace(operator, " "+operator+" ")
@@ -144,12 +170,12 @@ class Equation:
                 opeTemp = equationElements.pop(0)
                 equationElements[0] = opeTemp + equationElements[0]
             
-            # Replace equation elements by Equation object
+            # Replace equation elements by list of integer
             formattedElems = []
             for elem in equationElements:
                 value = elem
                 if isOperator(value) == False:
-                    value = Equation(polynome=Polynome(elem))
+                    value = self.__transformElementToValues(elem)
                 formattedElems.append(value)
 
             # Parse equation elements and do operations
@@ -168,10 +194,8 @@ class Equation:
                             formattedElems[i - 1] = self.operations[currentOpe[1]](currentOpe[0], currentOpe[2])
                             del formattedElems[i:i + 2]
                             break
-                if printSteps == True:
-                    print("Step :", formattedElems)
-            self.values = formattedElems[0].values
-            self.equation = ""
+                print("Step :", formattedElems)
+            return formattedElems[0]
 
     def getDelta(self):
         return (math.pow(self.b, 2)) - (4 * self.a * self.c)
@@ -197,63 +221,61 @@ class Equation:
         else :
             return self.c
 
-    def add(self, values):
-        lenSelf = len(self.values)
-        lenValues = len(values)
-        maxLen = lenSelf if lenSelf >= lenValues else lenValues
+    def add(self, src, dest):
+        lenSrc = len(src)
+        lenDest = len(dest)
+        maxLen = lenSrc if lenSrc >= lenDest else lenDest
         for i in range(0, maxLen):
-            if lenSelf < i + 1:
-                for j in range(lenSelf, i + 1):
-                    self.values.append(0)
-            value = self.values[i]
-            if i < lenValues:
-                value += values[i]
-            self.values[i] = value
-        return self
+            if lenSrc < i + 1:
+                for j in range(lenSrc, i + 1):
+                    src.append(0)
+            value = src[i]
+            if i < lenDest:
+                value += dest[i]
+            src[i] = value
+        return src
 
-    def sub(self, values):
-        lenSelf = len(self.values)
-        lenValues = len(values)
-        maxLen = lenSelf if lenSelf >= lenValues else lenValues
+    def sub(self, src, dest):
+        lenSrc = len(src)
+        lenDest = len(dest)
+        maxLen = lenSrc if lenSrc >= lenDest else lenDest
         for i in range(0, maxLen):
-            if lenSelf < i + 1:
-                for j in range(lenSelf, i + 1):
-                    self.values.append(0)
-            value = self.values[i]
-            if i < lenValues:
-                value -= values[i]
-            self.values[i] = value
-        return self
+            if lenSrc < i + 1:
+                for j in range(lenSrc, i + 1):
+                    src.append(0)
+            value = src[i]
+            if i < lenDest:
+                value -= dest[i]
+            src[i] = value
+        return src
 
-    def mul(self, values):
+    def mul(self, src, dest):
         newValues = []
-        lenSelf = len(self.values)
-        lenValues = len(values)
-        for i in range(0, lenSelf):
-            for j in range(0, lenValues):
+        lenSrc = len(src)
+        lenDest = len(dest)
+        for i in range(0, lenSrc):
+            for j in range(0, lenDest):
                 degre = i + j
                 lenVal = len(newValues)
                 if lenVal < degre + 1:
                     for k in range(lenVal, degre + 1):
                         newValues.append(0)
-                val = self.values[i] * values[j]
+                val = src[i] * dest[j]
                 newValues[degre] += val
-        self.values = newValues
-        return self
+        return newValues
 
-    def div(self, values):
+    def div(self, src, dest):
         newValues = []
-        lenSelf = len(self.values)
-        lenValues = len(values)
-        for i in range(0, lenSelf):
-            for j in range(0, lenValues):
+        lenSrc = len(src)
+        lenDest = len(dest)
+        for i in range(0, lenSrc):
+            for j in range(0, lenDest):
                 degre = i - j
                 lenVal = len(newValues)
                 if lenVal < degre + 1:
                     for k in range(lenVal, degre + 1):
                         newValues.append(0)
-                if values[j] != 0:
-                    val = self.values[i] / values[j]
+                if dest[j] != 0:
+                    val = src[i] / dest[j]
                     newValues[degre] += val
-        self.values = newValues
-        return self
+        return newValues
