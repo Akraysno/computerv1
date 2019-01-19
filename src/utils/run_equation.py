@@ -1,8 +1,4 @@
-import sys
-from verif_equation import verifEquation
 from equation import Equation
-from utils import checkForX
-from utils import replaceSigns
 
 def runEquation(equation:str):
     try:

@@ -2,9 +2,7 @@ import math
 import re
 from utils import atoi
 from utils import checkForX
-from utils import authorizeChar
 from utils import replaceSigns
-from utils import authorizeCharPosition
 from utils import find_nth_overlapping
 
 from copy import deepcopy
