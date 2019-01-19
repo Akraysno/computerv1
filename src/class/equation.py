@@ -88,12 +88,14 @@ class Equation:
         if searchFailNumber:
             raise ValueError('Synthax error at char ' + str(find_nth_overlapping(equation, searchFailNumber.group(0), 1) + 1))
 
+        # TODO create exception for n / x^-k
+
         #verify char positions, x can be placed anywhere
         maxLen = len(equation)
         for i in range(0, maxLen):
             if (i == 0) and (find_nth_overlapping("-+0123456789x", equation[i], 1) == -1):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i] == '^') and ((i == 0) or re.search('^(\^[\-|+|\s]*[0-9]+)', equation[i:]) == None):
+            if (equation[i] == '^') and ((i == 0) or re.search('^(\^[+|\s]*[0-9]+)', equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
             if (equation[i] == '=') and ((i == 0) or re.search('^(=[\-|+|\s]*[0-9|x]+)', equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
@@ -103,7 +105,7 @@ class Equation:
                 raise ValueError('Synthax error at char ' + str(i))
             if (equation[i] == '*') and ((i == 0) or re.search('^(\*[\-|+|\s]*[0-9|x]+)', equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i] == '/') and ((i == 0) or re.search('^(\/[\-|+|\s]*[0-9|x]+)', equation[i:]) == None):
+            if (equation[i] == '/') and ((i == 0) or re.search('^(\/[\-|+|\s]*[0-9]+)', equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
             if (equation[i].isdigit()) and (re.search('^([0-9][^\^])', equation[i:]) == None) and (re.search('^([0-9])$', equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
