@@ -1,3 +1,5 @@
+import re
+
 def authorizeChar(string: str):
     charList = "0123456789+-*/^x"
     for i in range(0, len(string)):
@@ -42,11 +44,11 @@ def replaceSigns(string: str):
 def replace_str(text:str, start_index:int, lengthToReplace: int, replacement:str = ''):
     return text[0:start_index] + replacement + text[start_index + lengthToReplace:]
 
-def checkForX(member: str):
+def checkForX(member: str, replaceBefore: bool = False):
     i = 0
     while i < len(member) - 1:
         if member[i] == 'x':
-            if (i > 0) and (member[i - 1].isdigit()):
+            if (replaceBefore == True) and (i > 0) and (member[i - 1].isdigit()):
                 member = replace_str(member, i, 1, "*x")
                 i = i - 1
             elif (i < len(member) - 1) and (member[i + 1].isdigit()):
@@ -73,6 +75,18 @@ def atoi(string:str):
             break
         i += 1
     return num * sign
+
+def atof(string:str):
+    p = re.compile('^([+\|-]?[\d]+(\.[\d]*)?)')
+    m = p.match(string)
+    if m:
+        result = m.groups()[0]
+        if "." in result:
+            return float(result)
+        else:
+            return int(result)
+    else:
+        return 0
 
 def find_nth_overlapping(haystack, needle, n):
     start = haystack.find(needle)
