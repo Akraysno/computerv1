@@ -3,6 +3,7 @@ sys.path.insert(0, os.path.dirname(__file__) + "/utils")
 sys.path.insert(0, os.path.dirname(__file__) + "/class")
 from run_equation import runEquation
 from run_equation import runTests
+from run_equation import runRandomEquation
 
 print("5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0")
 print("5 - 4 * X - 9.3 * 9 * -X^2 = -X^0")
@@ -25,8 +26,8 @@ try:
         equationInput = equationInput.lower().strip(" ")
         if (equationInput == "q") or (equationInput == "quit") or (equationInput == "exit"):
             exit()
-        elif (equationInput == "t") or (equationInput == "test"):
-            runTests()
+        elif (equationInput == "r") or (equationInput == "ran") or (equationInput == "random"):
+            runRandomEquation()
             continue
         else:
             runEquation(equationInput)

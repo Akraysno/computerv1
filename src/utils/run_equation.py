@@ -9,7 +9,7 @@ def runEquation(equation:str):
     except ValueError as err:
         print("Error : " + err.args[0])
 
-def runTests():
+def runRandomEquation():
     try:
         eq = Equation(genretateRandomValidatedEquation())
         eq.resolve()
@@ -46,3 +46,6 @@ def generateRandomNumberAsString(spacesAroundOperator: bool):
     numberString += " "+ope+" " if spacesAroundOperator == True else '-' if neg == True else ''
     numberString += str(number)
     return numberString
+
+def runTest():
+    return
