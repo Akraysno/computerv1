@@ -183,11 +183,15 @@ class Equation:
         test = self.__toString(self.operations['-']([0], self.__valuesMemberRight))
         test = test if test[0] == '-' else '+' + test
 
-        self.__printStep(self.__toString(self.__valuesMemberLeft) + test, "0")
-        self.__valuesMemberLeft = self.operations['-'](self.__valuesMemberLeft, self.__valuesMemberRight)
-        self.__printStep(self.__toString(self.__valuesMemberLeft), "0")
+        valuesMemberLeft = self.operations['-'](self.__valuesMemberLeft, self.__valuesMemberRight)
+        valuesMemberLeft = list(reversed(valuesMemberLeft))
+        maxLen = len(self.__valuesMemberLeft) - 1
+        while (valuesMemberLeft[0] == 0) and (len(valuesMemberLeft) > 1):
+            valuesMemberLeft.pop(0)
+        self.__valuesMemberLeft = list(reversed(valuesMemberLeft))
         self.__valuesMemberRight = [0]
         print('') if self.__options['printSteps'] == True else 0
+        print("Reduced form: ", self)
 
     def __simplifyMember(self, equation, otherMember, currentSideMember):
         leftMember = equation if currentSideMember == 'left' else otherMember
@@ -260,7 +264,6 @@ class Equation:
         return (math.pow(self.__valuesMemberLeft[1], 2)) - (4 * self.__valuesMemberLeft[2] * self.__valuesMemberLeft[0])
 
     def resolve(self):
-        print("Reduced form: ", self)
         self.__valuesMemberLeft
         lenVal = len(self.__valuesMemberLeft)
         degre = lenVal - 1
@@ -275,9 +278,12 @@ class Equation:
             else:
                 print("Tous les nombres sont solution")
         if (degre == 1):
-            print("roots:\n\nx1 = ", roots[0])
+            print("roots:\n\tx = ", roots[0])
         if (degre == 2):
-            print("roots:\n\nx1 = ", roots[0], "               x2 = ", roots[1])
+            if len(roots) == 1:
+                print("roots:\n\tx = ", roots[0])
+            else:
+                print("roots:\n\tx1 = ", roots[0], "               x2 = ", roots[1])
         
     def roots(self):
         values = self.__valuesMemberLeft
@@ -291,7 +297,7 @@ class Equation:
                 root_two = (- b + math.sqrt(delta)) / (2 * a)
                 return [root_one, root_two]
             if delta == 0:
-                return (- b) / (2 * a)
+                return [(- b) / (2 * a)]
             if delta < 0:
                 part_one = (- b ) / (2 * a)
                 part_two = (math.sqrt(math.fabs(delta))) / (2 * a)
