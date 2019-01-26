@@ -2,16 +2,16 @@ from equation import Equation
 from random import random
 from math import floor
 
-def runEquation(equation:str):
+def runEquation(equation:str, equationOptions= {}):
     try:
-        eq = Equation(equation)
+        eq = Equation(equation, equationOptions)
         eq.resolve()
     except ValueError as err:
         print("Error : " + err.args[0])
 
-def runRandomEquation():
+def runRandomEquation(equationOptions = {}):
     try:
-        eq = Equation(genretateRandomValidatedEquation())
+        eq = Equation(genretateRandomValidatedEquation(), equationOptions)
         eq.resolve()
     except ValueError as err:
         print("Error : " + err.args[0])
