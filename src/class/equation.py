@@ -8,8 +8,6 @@ from utils import find_nth_overlapping
 from fractions import Fraction
 from decimal import Decimal
 
-from copy import deepcopy
-
 OPERATORS = ['+', '-', '*', '/']
 
 def isOperator(token):
@@ -26,8 +24,7 @@ class Equation:
     __equationMemberRight = ""
     __lastStepPrint = ""
     __options = {
-        'printSimplifySteps': False,
-        'printFractionsForDecimals': True
+        'printSteps': False,
     }
 
     def __init__(self, equation:str, options = {}):
@@ -37,6 +34,7 @@ class Equation:
             '/': lambda src, dest: self.div(src, dest),
             '-': lambda src, dest: self.sub(src, dest),
         }
+        self.__options['printSteps'] = True if (options['printSteps'] and options['printSteps'] == True) else False
         self.__verifyAndSimplifyMembers(equation)
     
     def __repr__(self):
@@ -64,7 +62,7 @@ class Equation:
         return equation
 
     def __verifyCharPosition(self, equation:str):
-        print("equation: ", equation)
+        print("\nequation: ", equation)
 
         equation = equation.lower()
 
@@ -178,7 +176,7 @@ class Equation:
     def __simplifyMembers(self, leftMember, rightMember):
         self.__equationMemberLeft = leftMember
         self.__equationMemberRight = rightMember
-        print("Simplify equation: \n") if self.__options['printSimplifySteps'] == True else 0
+        print("Simplify equation: \n") if self.__options['printSteps'] == True else 0
         self.__valuesMemberLeft = self.__simplifyMember(self.__equationMemberLeft, self.__equationMemberRight, 'left')
         self.__valuesMemberRight = self.__simplifyMember(self.__equationMemberRight, self.__toString(self.__valuesMemberLeft), 'right')
 
@@ -189,12 +187,12 @@ class Equation:
         self.__valuesMemberLeft = self.operations['-'](self.__valuesMemberLeft, self.__valuesMemberRight)
         self.__printStep(self.__toString(self.__valuesMemberLeft), "0")
         self.__valuesMemberRight = [0]
-        print('') if self.__options['printSimplifySteps'] == True else 0
+        print('') if self.__options['printSteps'] == True else 0
 
     def __simplifyMember(self, equation, otherMember, currentSideMember):
         leftMember = equation if currentSideMember == 'left' else otherMember
         rightMember = equation if currentSideMember == 'right' else otherMember
-        self.__printStep(leftMember, rightMember) if self.__options['printSimplifySteps'] == True else 0
+        self.__printStep(leftMember, rightMember) if self.__options['printSteps'] == True else 0
 
         if len(equation) > 0:
             eq = equation
@@ -240,7 +238,7 @@ class Equation:
                         form += self.__toString(elem) 
                 leftMember = form if currentSideMember == 'left' else otherMember
                 rightMember = form if currentSideMember == 'right' else otherMember
-                self.__printStep(leftMember, rightMember) if self.__options['printSimplifySteps'] == True else 0
+                self.__printStep(leftMember, rightMember) if self.__options['printSteps'] == True else 0
             return formattedElems[0]
 
     def __printStep(self, left:str, right:str):
