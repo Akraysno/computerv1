@@ -13,7 +13,6 @@ OPERATORS = ['+', '-', '*', '/']
 def isOperator(token):
     return token in OPERATORS
 
-
 # TODO fix values for x^-n
 class Equation:
     operations = {}
@@ -25,6 +24,7 @@ class Equation:
     __lastStepPrint = ""
     __options = {
         'printSteps': False,
+        'printFractions': True
     }
 
     def __init__(self, equation:str, options = {}):
@@ -62,7 +62,7 @@ class Equation:
         return equation
 
     def __verifyCharPosition(self, equation:str):
-        print("\nequation: ", equation)
+        print("\nequation:", equation)
 
         equation = equation.lower()
 
@@ -191,7 +191,7 @@ class Equation:
         self.__valuesMemberLeft = list(reversed(valuesMemberLeft))
         self.__valuesMemberRight = [0]
         print('') if self.__options['printSteps'] == True else 0
-        print("Reduced form: ", self)
+        print("Reduced form:", self)
 
     def __simplifyMember(self, equation, otherMember, currentSideMember):
         leftMember = equation if currentSideMember == 'left' else otherMember
@@ -249,8 +249,8 @@ class Equation:
         left = left.replace(' ', '')
         right = right.replace(' ', '')
         for operator in OPERATORS:
-            left = left.replace(operator, " "+operator+" ")
-            right = right.replace(operator, " "+operator+" ")
+            left = left.replace(operator, ' '+operator+' ')
+            right = right.replace(operator, ' '+operator+' ')
         if left[0] == ' ':
             left = left.replace(' - ', '-', 1)
         if right[0] == ' ':
@@ -267,7 +267,7 @@ class Equation:
         self.__valuesMemberLeft
         lenVal = len(self.__valuesMemberLeft)
         degre = lenVal - 1
-        print("Polynomial degree: ", degre)
+        print("Polynomial degree:", str(degre))
         # transform to fraction with : Fraction( Decimal( str( float ) ) )
         if degre > 2:
             raise ValueError('Polynomial degree too high')
@@ -278,12 +278,13 @@ class Equation:
             else:
                 print("Tous les nombres sont solution")
         if (degre == 1):
-            print("roots:\n\tx = ", roots[0])
+            print("roots:\n\tx =", str(roots[0]).rstrip('0').rstrip('.'))
         if (degre == 2):
+            print("Delta:", str(self.getDelta()).rstrip('0').rstrip('.') if self.getDelta() != 0 else '0')
             if len(roots) == 1:
-                print("roots:\n\tx = ", roots[0])
+                print("roots:\n\tx =", roots[0])
             else:
-                print("roots:\n\tx1 = ", roots[0], "               x2 = ", roots[1])
+                print("roots:\n\tx1 =", roots[0], "\n\tx2 =", roots[1])
         
     def roots(self):
         values = self.__valuesMemberLeft
@@ -293,18 +294,24 @@ class Equation:
         if a != 0:
             delta = self.getDelta()
             if delta > 0:
-                root_one = (- b - math.sqrt(delta)) / (2 * a)
-                root_two = (- b + math.sqrt(delta)) / (2 * a)
-                return [root_one, root_two]
+                rootOne = (- b - math.sqrt(delta)) / (2 * a)
+                rootTwo = (- b + math.sqrt(delta)) / (2 * a)
+                rootOneAsString = str(rootOne).rstrip('0').rstrip('.') if rootOne != 0 else '0'
+                rootTwoAsString = str(rootTwo).rstrip('0').rstrip('.') if rootTwo != 0 else '0'
+                return [rootOneAsString, rootTwoAsString]
             if delta == 0:
+                root = (- b) / (2 * a)
+                rootAsString = str(root).rstrip('0').rstrip('.') if root != 0 else '0'
                 return [(- b) / (2 * a)]
             if delta < 0:
-                part_one = (- b ) / (2 * a)
-                part_two = (math.sqrt(math.fabs(delta))) / (2 * a)
-                root_one_part_two_sign = " + " if (part_two < 0) else " - "
-                root_two_part_two_sign = " - " if (part_two < 0) else " + "
-                root_one = str(part_one) + root_one_part_two_sign + str(math.fabs(part_two)) +"i"
-                root_two = str(part_one) + root_two_part_two_sign + str(math.fabs(part_two)) +"i"
+                partOne = (- b ) / (2 * a)
+                partTwo = (math.sqrt(math.fabs(delta))) / (2 * a)
+                rootOnePartTwoSign = " + " if (partTwo < 0) else " - "
+                rootTwoPartTwoSign = " - " if (partTwo < 0) else " + "
+                partOneAsString = str(partOne).rstrip('0').rstrip('.') if partOne != 0 else ''
+                partTwoAsString = str(math.fabs(partTwo)).rstrip('0').rstrip('.') if partTwo != 0 else ''
+                root_one = partOneAsString + (rootOnePartTwoSign if (partOne != 0) or (partOne < 0) else '') + partTwoAsString +"i"
+                root_two = partOneAsString + (rootOnePartTwoSign if (partOne != 0) or (partOne < 0) else '') + partTwoAsString +"i"
                 return [root_one, root_two]
         elif b != 0:
             return [- c / b]
