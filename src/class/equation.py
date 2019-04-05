@@ -24,7 +24,7 @@ class Equation:
     __lastStepPrint = ""
     __options = {
         'printSteps': False,
-        'printFractions': True
+        'rootsAsFraction': True
     }
 
     def __init__(self, equation:str, options = {}):
@@ -35,6 +35,7 @@ class Equation:
             '-': lambda src, dest: self.sub(src, dest),
         }
         self.__options['printSteps'] = True if (options['printSteps'] and options['printSteps'] == True) else False
+        self.__options['rootsAsFraction'] = True if (options['rootsAsFraction'] and options['rootsAsFraction'] == True) else False
         self.__verifyAndSimplifyMembers(equation)
     
     def __repr__(self):
@@ -287,6 +288,7 @@ class Equation:
                 print("roots:\n\tx1 =", roots[0], "\n\tx2 =", roots[1])
         
     def roots(self):
+        print(self.__options)
         values = self.__valuesMemberLeft
         a = values[2] if len(values) >= 3 else 0
         b = values[1] if len(values) >= 2 else 0
@@ -298,6 +300,12 @@ class Equation:
                 rootTwo = (- b + math.sqrt(delta)) / (2 * a)
                 rootOneAsString = str(rootOne).rstrip('0').rstrip('.') if rootOne != 0 else '0'
                 rootTwoAsString = str(rootTwo).rstrip('0').rstrip('.') if rootTwo != 0 else '0'
+                rootOneAsFraction = Fraction(rootOne)
+                rootTwoAsFraction = Fraction(rootTwo)
+                rootOneAsFraction2 = Fraction(rootOneAsString)
+                rootTwoAsFraction2 = Fraction(rootTwoAsString)
+                print(rootOne, rootOneAsString, rootOneAsFraction, rootOneAsFraction2)
+                print(rootTwo, rootTwoAsString, rootTwoAsFraction, rootTwoAsFraction2)
                 return [rootOneAsString, rootTwoAsString]
             if delta == 0:
                 root = (- b) / (2 * a)

@@ -1,6 +1,8 @@
 from equation import Equation
 from random import random
 from math import floor
+from fractions import Fraction
+from decimal import Decimal
 
 def runEquation(equation:str, equationOptions= {}):
     try:
@@ -47,5 +49,8 @@ def generateRandomNumberAsString(spacesAroundOperator: bool):
     numberString += str(number)
     return numberString
 
-def runTest():
+def runTests():
+    num = Fraction(Fraction("3.5")* 1/3)
+    print(num.numerator, num.denominator)
+    
     return

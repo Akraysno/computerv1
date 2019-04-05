@@ -30,14 +30,23 @@ def updateEquationOptions(string: str, equationOptions):
                     equationOptions['printSteps'] = False if opts[0] == 'false' else True
                 else:
                     print('Invalid steps option value : ' + opts[0])
+            elif (re.search('^(-f|--fraction)=', opt)):
+                opts = opt.split('=')
+                opts.pop(0)
+                if len(opts) > 0 and (opts[0] == 'false' or opts[0] == 'true'):
+                    equationOptions['rootsAsFraction'] = False if opts[0] == 'false' else True
+                else:
+                    print('Invalid fraction option value : ' + opts[0])
             else:
                 print('Invalid option : ' + opt)
     else:
-        print('\tPrint steps by passing steps argument to true:\n\t\t[(-s | --steps)=(true | false)]\n\t\tCurrent value : ' + 'false' if equationOptions['printSteps'] == False else true)
+        print('\tPrint steps by passing steps argument to true:\n\t\t[(-s | --steps)=(true | false)]\n\t\tCurrent value : ' + 'false' if equationOptions['printSteps'] == False else 'true')
+        print('\tPrint roots with fractions by passing fraction argument to true:\n\t\t[(-f | --fraction)=(true | false)]\n\t\tCurrent value : ' + 'false' if equationOptions['rootsAsFraction'] == False else 'true')
     return equationOptions
 
 equationOptions = {
-    'printSteps': False
+    'printSteps': False,
+    'rootsAsFraction': True
 }
 #Add "man" and "help" command
 try:
@@ -45,7 +54,6 @@ try:
         signal.signal(signal.SIGINT, signal_handler)
         equationInput = input("\nEntrez une équation: ")
         equationInput = equationInput.lower().strip(" ")
-        print(equationOptions)
         if len(equationInput) > 0:
             if (equationInput == "q") or (equationInput == "quit") or (equationInput == "exit"):
                 exit()
