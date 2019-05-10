@@ -18,7 +18,7 @@ def runRandomEquation(equationOptions = {}):
     except ValueError as err:
         print("Error : " + err.args[0])
 
-def genretateRandomValidatedEquation():
+def generateRandomValidatedEquation():
     memberLeft = generateRandomValidatedMemberEquation()
     memberRight = generateRandomValidatedMemberEquation() if floor(random() * 2) == 1 else "0"
     return memberLeft + " = " + memberRight
@@ -51,6 +51,6 @@ def generateRandomNumberAsString(spacesAroundOperator: bool):
 
 def runTests():
     num = Fraction(Fraction("3.5")* 1/3)
-    print(num.numerator, num.denominator)
+    #print(num.numerator, num.denominator)
     
     return

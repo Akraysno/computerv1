@@ -288,7 +288,7 @@ class Equation:
                 print("roots:\n\tx1 =", roots[0], "\n\tx2 =", roots[1])
         
     def roots(self):
-        print(self.__options)
+        #print(self.__options)
         values = self.__valuesMemberLeft
         a = values[2] if len(values) >= 3 else 0
         b = values[1] if len(values) >= 2 else 0
@@ -304,8 +304,8 @@ class Equation:
                 rootTwoAsFraction = Fraction(rootTwo)
                 rootOneAsFraction2 = Fraction(rootOneAsString)
                 rootTwoAsFraction2 = Fraction(rootTwoAsString)
-                print(rootOne, rootOneAsString, rootOneAsFraction, rootOneAsFraction2)
-                print(rootTwo, rootTwoAsString, rootTwoAsFraction, rootTwoAsFraction2)
+                #print(rootOne, rootOneAsString, rootOneAsFraction, rootOneAsFraction2)
+                #print(rootTwo, rootTwoAsString, rootTwoAsFraction, rootTwoAsFraction2)
                 return [rootOneAsString, rootTwoAsString]
             if delta == 0:
                 root = (- b) / (2 * a)
