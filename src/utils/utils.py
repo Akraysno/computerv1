@@ -1,7 +1,7 @@
 import re
 
 def authorizeChar(string: str):
-    charList = "0123456789+-*/^x"
+    charList = '0123456789+-*/^x'
     for i in range(0, len(string)):
         validChar = False
         for j in range(0, len(charList)):
@@ -49,10 +49,10 @@ def checkForX(member: str, replaceBefore: bool = False):
     while i < len(member) - 1:
         if member[i] == 'x':
             if (replaceBefore == True) and (i > 0) and (member[i - 1].isdigit()):
-                member = replace_str(member, i, 1, "*x")
+                member = replace_str(member, i, 1, '*x')
                 i = i - 1
             elif (i < len(member) - 1) and (member[i + 1].isdigit()):
-                member = replace_str(member, i, 1, "x*")
+                member = replace_str(member, i, 1, 'x*')
         i += 1
     return member
 
@@ -81,7 +81,7 @@ def atof(string:str):
     m = p.match(string)
     if m:
         result = m.groups()[0]
-        if "." in result:
+        if '.' in result:
             return float(result)
         else:
             return int(result)

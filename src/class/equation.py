@@ -16,12 +16,12 @@ def isOperator(token):
 # TODO fix values for x^-n
 class Equation:
     operations = {}
-    equation = ""
+    equation = ''
     __valuesMemberLeft = []
     __valuesMemberRight = []
-    __equationMemberLeft = ""
-    __equationMemberRight = ""
-    __lastStepPrint = ""
+    __equationMemberLeft = ''
+    __equationMemberRight = ''
+    __lastStepPrint = ''
     __options = {
         'printSteps': False,
         'rootsAsFraction': True
@@ -39,31 +39,31 @@ class Equation:
         self.__verifyAndSimplifyMembers(equation)
     
     def __repr__(self):
-        return self.__toString(self.__valuesMemberLeft) + " = " + self.__toString(self.__valuesMemberRight)
+        return self.__toString(self.__valuesMemberLeft) + ' = ' + self.__toString(self.__valuesMemberRight)
 
     def __toString(self, values):
         length = len(values)
-        equation = ""
+        equation = ''
         for i in range(length - 1, -1, -1):
             value = values[i]
             if value != 0:
                 if len(equation) > 0:
                     if value >= 0:
-                        equation += " + "
+                        equation += ' + '
                     else:
-                        equation += " - "
+                        equation += ' - '
                         value *= -1
                 equation += str(value)
                 if i != 0:
-                    equation += "x"
+                    equation += 'x'
                     if i != 1:
-                        equation += "^"+str(i)
+                        equation += '^'+str(i)
             elif value == 0 and length == 1:
                 equation += str(value)
         return equation
 
     def __verifyCharPosition(self, equation:str):
-        print("\nequation:", equation)
+        print('\nequation:', equation)
 
         equation = equation.lower()
 
@@ -75,7 +75,7 @@ class Equation:
         # Verify equality
         if equation.count('=') != 1:
             if equation.count('=') == 0:
-                raise ValueError("Synthax error : Missing '='")
+                raise ValueError('Synthax error : Missing \'=\'')
             raise ValueError('Synthax error at char ' + str(find_nth_overlapping(equation, '=', 2)))
 
         # Search particular case: ^[+|-][0-9][.][0-9]x
@@ -98,7 +98,7 @@ class Equation:
         #verify char positions, x can be placed anywhere
         maxLen = len(equation)
         for i in range(0, maxLen):
-            if (i == 0) and (find_nth_overlapping("-+0123456789x", equation[i], 1) == -1):
+            if (i == 0) and (find_nth_overlapping('-+0123456789x', equation[i], 1) == -1):
                 raise ValueError('Synthax error at char ' + str(i))
             if (equation[i] == '^') and ((i == 0) or re.search('^(\^[+|\s]*[0-9]+)', equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
@@ -177,7 +177,7 @@ class Equation:
     def __simplifyMembers(self, leftMember, rightMember):
         self.__equationMemberLeft = leftMember
         self.__equationMemberRight = rightMember
-        print("Simplify equation: \n") if self.__options['printSteps'] == True else 0
+        print('Simplify equation: \n') if self.__options['printSteps'] == True else 0
         self.__valuesMemberLeft = self.__simplifyMember(self.__equationMemberLeft, self.__equationMemberRight, 'left')
         self.__valuesMemberRight = self.__simplifyMember(self.__equationMemberRight, self.__toString(self.__valuesMemberLeft), 'right')
 
@@ -192,7 +192,7 @@ class Equation:
         self.__valuesMemberLeft = list(reversed(valuesMemberLeft))
         self.__valuesMemberRight = [0]
         print('') if self.__options['printSteps'] == True else 0
-        print("Reduced form:", self)
+        print('Reduced form:', self)
 
     def __simplifyMember(self, equation, otherMember, currentSideMember):
         leftMember = equation if currentSideMember == 'left' else otherMember
@@ -203,7 +203,7 @@ class Equation:
             eq = equation
             # Split equation
             for operator in OPERATORS:
-                eq = eq.replace(operator, " "+operator+" ")
+                eq = eq.replace(operator, ' '+operator+' ')
             equationElements = eq.split()
 
             #Fix elements at first position
@@ -225,17 +225,17 @@ class Equation:
                 mulDivOpe = False
                 for i in range(0, lenElems):
                     if isOperator(formattedElems[i]):
-                        if (formattedElems[i] == "*") or (formattedElems[i] == "/"):
+                        if (formattedElems[i] == '*') or (formattedElems[i] == '/'):
                             mulDivOpe = True
                             break
                 for i in range(0, lenElems):
                     if isOperator(formattedElems[i]):
-                        if (formattedElems[i] == "*") or (formattedElems[i] == "/") or (mulDivOpe == False):
+                        if (formattedElems[i] == '*') or (formattedElems[i] == '/') or (mulDivOpe == False):
                             currentOpe = formattedElems[i - 1 : i + 2 : 1]
                             formattedElems[i - 1] = self.operations[currentOpe[1]](currentOpe[0], currentOpe[2])
                             del formattedElems[i:i + 2]
                             break
-                form = ""
+                form = ''
                 for elem in formattedElems:
                     if isOperator(elem) == True:
                         form += elem
@@ -268,24 +268,24 @@ class Equation:
         self.__valuesMemberLeft
         lenVal = len(self.__valuesMemberLeft)
         degre = lenVal - 1
-        print("Polynomial degree:", str(degre))
+        print('Polynomial degree:', str(degre))
         # transform to fraction with : Fraction( Decimal( str( float ) ) )
         if degre > 2:
             raise ValueError('Polynomial degree too high')
         roots = self.roots()
         if (degre == 0):
             if (roots[0] != 0):
-                print("Equation sans solution")
+                print('Equation sans solution')
             else:
-                print("Tous les nombres sont solution")
+                print('Tous les nombres sont solution')
         if (degre == 1):
-            print("roots:\n\tx =", str(roots[0]).rstrip('0').rstrip('.'))
+            print('roots:\n\tx =', str(roots[0]).rstrip('0').rstrip('.'))
         if (degre == 2):
-            print("Delta:", str(self.getDelta()).rstrip('0').rstrip('.') if self.getDelta() != 0 else '0')
+            print('Delta:', str(self.getDelta()).rstrip('0').rstrip('.') if self.getDelta() != 0 else '0')
             if len(roots) == 1:
-                print("roots:\n\tx =", roots[0])
+                print('roots:\n\tx =', roots[0])
             else:
-                print("roots:\n\tx1 =", roots[0], "\n\tx2 =", roots[1])
+                print('roots:\n\tx1 =', roots[0], '\n\tx2 =', roots[1])
         
     def roots(self):
         #print(self.__options)
@@ -314,12 +314,12 @@ class Equation:
             if delta < 0:
                 partOne = (- b ) / (2 * a)
                 partTwo = (math.sqrt(math.fabs(delta))) / (2 * a)
-                rootOnePartTwoSign = " + " if (partTwo < 0) else " - "
-                rootTwoPartTwoSign = " - " if (partTwo < 0) else " + "
+                rootOnePartTwoSign = ' + ' if (partTwo < 0) else ' - '
+                rootTwoPartTwoSign = ' - ' if (partTwo < 0) else ' + '
                 partOneAsString = str(partOne).rstrip('0').rstrip('.') if partOne != 0 else ''
                 partTwoAsString = str(math.fabs(partTwo)).rstrip('0').rstrip('.') if partTwo != 0 else ''
-                root_one = partOneAsString + (rootOnePartTwoSign if (partOne != 0) or (partOne < 0) else '') + partTwoAsString +"i"
-                root_two = partOneAsString + (rootOnePartTwoSign if (partOne != 0) or (partOne < 0) else '') + partTwoAsString +"i"
+                root_one = partOneAsString + (rootOnePartTwoSign if (partOne != 0) or (partOne < 0) else '') + partTwoAsString +'i'
+                root_two = partOneAsString + (rootOnePartTwoSign if (partOne != 0) or (partOne < 0) else '') + partTwoAsString +'i'
                 return [root_one, root_two]
         elif b != 0:
             return [- c / b]
