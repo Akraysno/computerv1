@@ -2,7 +2,6 @@ import sys, os, signal, re
 sys.path.insert(0, os.path.dirname(__file__) + '/utils')
 sys.path.insert(0, os.path.dirname(__file__) + '/class')
 from run_equation import runEquation
-from run_equation import runTests
 from run_equation import runRandomEquation
 
 print('5 * X^0 + 4 * X^1 - 9.3 * X^2 = 1 * X^0')
@@ -48,6 +47,7 @@ equationOptions = {
     'printSteps': False,
     'rootsAsFraction': True
 }
+
 #Add 'man' and 'help' command
 try:
     while True:
@@ -60,8 +60,6 @@ try:
             elif (equationInput == 'r') or (equationInput == 'ran') or (equationInput == 'random'):
                 runRandomEquation(equationOptions)
                 continue
-            elif (equationInput == 't') or (equationInput == 'test'):
-                runTests()
             elif (len(equationInput) > 0) and ((equationInput.split()[0] == 'o') or (equationInput.split()[0] == 'options')):
                 equationOptions = updateEquationOptions(equationInput, equationOptions)
             else:
