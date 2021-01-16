@@ -41,10 +41,12 @@ class Equation:
     def __repr__(self):
         return self.__toString(self.__valuesMemberLeft) + ' = ' + self.__toString(self.__valuesMemberRight)
 
-    def __toString(self, values):
-        length = len(values)
+    def __toString(self, values: dict):
         equation = ''
-        for i in range(length - 1, -1, -1):
+        keys = list(values.keys())
+        nbKey = len(keys)
+        keys = sorted(keys, reverse=True)
+        for i in keys:
             value = values[i]
             if value != 0:
                 if len(equation) > 0:
@@ -58,7 +60,7 @@ class Equation:
                     equation += 'x'
                     if i != 1:
                         equation += '^'+str(i)
-            elif value == 0 and length == 1:
+            elif value == 0 and nbKey == 1:
                 equation += str(value)
         return equation
 
@@ -129,7 +131,7 @@ class Equation:
         return equation
 
     def __transformElementToValues(self, element: str):
-        values = []
+        values = dict()
         if len(element) > 0:
             value:int = 0
             degres:int = 0
@@ -161,11 +163,10 @@ class Equation:
                                 degres = atoi(element[2:])
                             else:
                                 value = value * atoi(element[1:]) if value != 0 else atoi(element[1:])
-            length = len(values)
-            if length < degres + 1:
-                for j in range(length, degres + 1):
-                    values.append(0)
+            if degres in values:
             values[degres] += value
+            else:
+                values[degres] = value
         return values
 
     def __verifyAndSimplifyMembers(self, equation:str):
@@ -181,16 +182,12 @@ class Equation:
         self.__valuesMemberLeft = self.__simplifyMember(self.__equationMemberLeft, self.__equationMemberRight, 'left')
         self.__valuesMemberRight = self.__simplifyMember(self.__equationMemberRight, self.__toString(self.__valuesMemberLeft), 'right')
 
-        test = self.__toString(self.operations['-']([0], self.__valuesMemberRight))
+        test = self.__toString(self.operations['-'](dict(), self.__valuesMemberRight))
         test = test if test[0] == '-' else '+' + test
 
         valuesMemberLeft = self.operations['-'](self.__valuesMemberLeft, self.__valuesMemberRight)
-        valuesMemberLeft = list(reversed(valuesMemberLeft))
-        maxLen = len(self.__valuesMemberLeft) - 1
-        while (valuesMemberLeft[0] == 0) and (len(valuesMemberLeft) > 1):
-            valuesMemberLeft.pop(0)
-        self.__valuesMemberLeft = list(reversed(valuesMemberLeft))
-        self.__valuesMemberRight = [0]
+        self.__valuesMemberLeft = valuesMemberLeft
+        self.__valuesMemberRight = {0: 0}
         print('') if self.__options['printSteps'] == True else 0
         print('Reduced form:', self)
 
@@ -204,6 +201,8 @@ class Equation:
             # Split equation
             for operator in OPERATORS:
                 eq = eq.replace(operator, ' '+operator+' ')
+            eq = eq.replace('^ + ', '^+')
+            eq = eq.replace('^ - ', '^-')
             equationElements = eq.split()
 
             #Fix elements at first position
@@ -262,12 +261,15 @@ class Equation:
             print(printStep)
 
     def getDelta(self):
-        return (math.pow(self.__valuesMemberLeft[1], 2)) - (4 * self.__valuesMemberLeft[2] * self.__valuesMemberLeft[0])
+        a = self.__valuesMemberLeft[2] if 2 in self.__valuesMemberLeft else 0
+        b = self.__valuesMemberLeft[1] if 1 in self.__valuesMemberLeft else 0
+        c = self.__valuesMemberLeft[0] if 0 in self.__valuesMemberLeft else 0
+        return (math.pow(b, 2)) - (4 * a * c)
 
     def resolve(self):
-        self.__valuesMemberLeft
-        lenVal = len(self.__valuesMemberLeft)
-        degre = lenVal - 1
+        keys = list(self.__valuesMemberLeft.keys())
+        keys = sorted(keys)
+        degre = keys[-1]
         print('Polynomial degree:', str(degre))
         # transform to fraction with : Fraction( Decimal( str( float ) ) )
         if degre > 2:
@@ -279,20 +281,35 @@ class Equation:
             else:
                 print('Tous les nombres sont solution')
         if (degre == 1):
-            print('roots:\n\tx =', str(roots[0]).rstrip('0').rstrip('.'))
+            currentRoot = str(roots[0])
+            currentRoot = currentRoot.rstrip('0') if '.' in currentRoot else currentRoot
+            currentRoot = currentRoot.rstrip('.')
+            print('roots:\n\tx =', currentRoot)
         if (degre == 2):
-            print('Delta:', str(self.getDelta()).rstrip('0').rstrip('.') if self.getDelta() != 0 else '0')
+            currentDelta = str(self.getDelta())
+            currentDelta = currentDelta.rstrip('0') if '.' in currentDelta else currentDelta
+            currentDelta = currentDelta.rstrip('.')
+            print('Delta:', currentDelta)
             if len(roots) == 1:
-                print('roots:\n\tx =', roots[0])
+                currentRoot = str(roots[0])
+                currentRoot = currentRoot.rstrip('0') if '.' in currentRoot else currentRoot
+                currentRoot = currentRoot.rstrip('.')
+                print('roots:\n\tx =', currentRoot)
             else:
-                print('roots:\n\tx1 =', roots[0], '\n\tx2 =', roots[1])
+                currentRoot1 = str(roots[0])
+                currentRoot1 = currentRoot1.rstrip('0') if '.' in currentRoot1 else currentRoot1
+                currentRoot1 = currentRoot1.rstrip('.')
+                currentRoot2 = str(roots[1])
+                currentRoot2 = currentRoot2.rstrip('0') if '.' in currentRoot2 else currentRoot2
+                currentRoot2 = currentRoot2.rstrip('.')
+                print('roots:\n\tx1 =', currentRoot1, '\n\tx2 =', currentRoot2)
         
     def roots(self):
         #print(self.__options)
         values = self.__valuesMemberLeft
-        a = values[2] if len(values) >= 3 else 0
-        b = values[1] if len(values) >= 2 else 0
-        c = values[0] if len(values) >= 1 else 0
+        a = values[2] if 2 in values else 0
+        b = values[1] if 1 in values else 0
+        c = values[0] if 0 in values else 0
         if a != 0:
             delta = self.getDelta()
             if delta > 0:
@@ -326,61 +343,42 @@ class Equation:
         else :
             return [c]
 
-    def add(self, src, dest):
-        lenSrc = len(src)
-        lenDest = len(dest)
-        maxLen = lenSrc if lenSrc >= lenDest else lenDest
-        for i in range(0, maxLen):
-            if lenSrc < i + 1:
-                for j in range(lenSrc, i + 1):
-                    src.append(0)
-            value = src[i]
-            if i < lenDest:
-                value += dest[i]
-            src[i] = value
+    def add(self, src: dict, dest: dict):
+        for key in dest:
+            if key in src:
+                src[key] += dest[key]
+            else:
+                src[key] = dest[key]
         return src
 
-    def sub(self, src, dest):
-        lenSrc = len(src)
-        lenDest = len(dest)
-        maxLen = lenSrc if lenSrc >= lenDest else lenDest
-        for i in range(0, maxLen):
-            if lenSrc < i + 1:
-                for j in range(lenSrc, i + 1):
-                    src.append(0)
-            value = src[i]
-            if i < lenDest:
-                value -= dest[i]
-            src[i] = value
+    def sub(self, src: dict, dest: dict):
+        for key in dest:
+            if key in src:
+                src[key] -= dest[key]
+            else:
+                src[key] = dest[key] * -1
         return src
 
-    def mul(self, src, dest):
-        newValues = []
-        lenSrc = len(src)
-        lenDest = len(dest)
-        for i in range(0, lenSrc):
-            for j in range(0, lenDest):
-                degre = i + j
-                lenVal = len(newValues)
-                if lenVal < degre + 1:
-                    for k in range(lenVal, degre + 1):
-                        newValues.append(0)
-                val = src[i] * dest[j]
-                newValues[degre] += val
-        return newValues
+    def mul(self, src: dict, dest: dict):
+        res = dict()
+        for key in src:
+            if key in dest:
+                res[key + key] = src[key] * dest[key]
+                dest.pop(key, None)
+            else:
+                res[key] = src[key]
+        for key in dest:
+            res[key] = dest[key]
+        return res
 
-    def div(self, src, dest):
-        newValues = []
-        lenSrc = len(src)
-        lenDest = len(dest)
-        for i in range(0, lenSrc):
-            for j in range(0, lenDest):
-                degre = i - j
-                lenVal = len(newValues)
-                if lenVal < degre + 1:
-                    for k in range(lenVal, degre + 1):
-                        newValues.append(0)
-                if dest[j] != 0:
-                    val = src[i] / dest[j]
-                    newValues[degre] += val
-        return newValues
+    def div(self, src: dict, dest: dict):
+        res = dict()
+        for key in src:
+            if key in dest:
+                res[key - key] = src[key] / dest[key]
+                dest.pop(key, None)
+            else:
+                res[key] = src[key]
+        for key in dest:
+            res[key] = dest[key]
+        return res
