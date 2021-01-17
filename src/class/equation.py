@@ -17,8 +17,9 @@ def isOperator(token):
 class Equation:
     operations = {}
     equation = ''
-    __valuesMemberLeft = []
-    __valuesMemberRight = []
+    steps = []
+    __valuesMemberLeft = {}
+    __valuesMemberRight = {}
     __equationMemberLeft = ''
     __equationMemberRight = ''
     __lastStepPrint = ''
@@ -55,7 +56,13 @@ class Equation:
                     else:
                         equation += ' - '
                         value *= -1
-                equation += str(value)
+                if i is 0: 
+                    equation += str(value)
+                else:
+                    if value is -1:
+                        equation += '-'
+                    elif value is not 1:
+                        equation += str(value)
                 if i != 0:
                     equation += 'x'
                     if i != 1:
@@ -102,7 +109,7 @@ class Equation:
         for i in range(0, maxLen):
             if (i == 0) and (find_nth_overlapping('-+0123456789x', equation[i], 1) == -1):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i] == '^') and ((i == 0) or re.search('^(\^[+|\s]*[0-9]+)', equation[i:]) == None):
+            if (equation[i] == '^') and ((i == 0) or re.search('^(\^[-|+|\s]*[0-9]+)', equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
             if (equation[i] == '=') and ((i == 0) or re.search('^(=[\-|+|\s]*[0-9|x]+)', equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
@@ -164,7 +171,7 @@ class Equation:
                             else:
                                 value = value * atoi(element[1:]) if value != 0 else atoi(element[1:])
             if degres in values:
-            values[degres] += value
+                values[degres] += value
             else:
                 values[degres] = value
         return values
@@ -178,26 +185,76 @@ class Equation:
     def __simplifyMembers(self, leftMember, rightMember):
         self.__equationMemberLeft = leftMember
         self.__equationMemberRight = rightMember
-        print('Simplify equation: \n') if self.__options['printSteps'] == True else 0
-        self.__valuesMemberLeft = self.__simplifyMember(self.__equationMemberLeft, self.__equationMemberRight, 'left')
-        self.__valuesMemberRight = self.__simplifyMember(self.__equationMemberRight, self.__toString(self.__valuesMemberLeft), 'right')
-
-        test = self.__toString(self.operations['-'](dict(), self.__valuesMemberRight))
-        test = test if test[0] == '-' else '+' + test
-
-        valuesMemberLeft = self.operations['-'](self.__valuesMemberLeft, self.__valuesMemberRight)
-        self.__valuesMemberLeft = valuesMemberLeft
+        self.__valuesMemberLeft = self.__simplify(self.__equationMemberLeft, self.__equationMemberRight)
         self.__valuesMemberRight = {0: 0}
-        print('') if self.__options['printSteps'] == True else 0
+        if (self.__options['printSteps'] is True) and (len(self.steps) > 1):
+            print('Simplify equation:')
+            for line in self.steps:
+                print('\t'+line)
         print('Reduced form:', self)
 
-    def __simplifyMember(self, equation, otherMember, currentSideMember):
-        leftMember = equation if currentSideMember == 'left' else otherMember
-        rightMember = equation if currentSideMember == 'right' else otherMember
-        self.__printStep(leftMember, rightMember) if self.__options['printSteps'] == True else 0
+    def __simplify(self, leftMember, rightMember):
+        self.__printStep(leftMember, rightMember, False) if self.__options['printSteps'] == True else 0
+        leftFormatted = self.__convertMember(leftMember)
+        rightFormatted = self.__convertMember(rightMember)
+         
+        for i in range(0, len(rightFormatted)):
+            if isOperator(rightFormatted[i]) is True:
+                if rightFormatted[i] is '-':
+                    elem = rightFormatted[i + 1]
+                    keys = list(elem.keys())
+                    key = keys[0]
+                    rightFormatted[i + 1][key] *= -1
+                    rightFormatted[i] = '+'
+            else:
+                if i is 0:
+                    leftFormatted.append('+')
+                keys = list(rightFormatted[i].keys())
+                for key in keys:
+                    rightFormatted[i][key] *= -1
+            leftFormatted.append(rightFormatted[i])
+        rightFormatted = [{0: 0}]
+        
+        self.__formattedToString(leftFormatted, rightFormatted)
 
-        if len(equation) > 0:
-            eq = equation
+        # Parse equation elements and do operations
+        while len(leftFormatted) > 1:
+            lenElems = len(leftFormatted)
+            mulDivOpe = False
+            for i in range(0, lenElems):
+                if isOperator(leftFormatted[i]):
+                    if (leftFormatted[i] == '*') or (leftFormatted[i] == '/'):
+                        mulDivOpe = True
+                        break
+            for i in range(0, lenElems):
+                if isOperator(leftFormatted[i]):
+                    if (leftFormatted[i] == '*') or (leftFormatted[i] == '/') or (mulDivOpe == False):
+                        currentOpe = leftFormatted[i - 1 : i + 2 : 1]
+                        leftFormatted[i - 1] = self.operations[currentOpe[1]](currentOpe[0], currentOpe[2])
+                        del leftFormatted[i:i + 2]
+                        break
+            self.__formattedToString(leftFormatted, rightFormatted)
+        return leftFormatted[0]
+
+    def __formattedToString(self, leftFormatted, rightFormatted):
+        leftMember = ''
+        rightMember = ''
+        for elem in leftFormatted:
+            if isOperator(elem) == True:
+                leftMember += elem
+            else:
+                leftMember += self.__toString(elem) 
+        for elem in rightFormatted:
+            if isOperator(elem) == True:
+                rightMember += elem
+            else:
+                rightMember += self.__toString(elem) 
+        self.__printStep(leftMember, rightMember, False) if self.__options['printSteps'] == True else 0
+
+    def __convertMember(self, member):
+        formattedMember = []
+        if len(member) > 0:
+            eq = member
             # Split equation
             for operator in OPERATORS:
                 eq = eq.replace(operator, ' '+operator+' ')
@@ -211,41 +268,14 @@ class Equation:
                 equationElements[0] = opeTemp + equationElements[0]
             
             # Replace equation elements by list of integer
-            formattedElems = []
             for elem in equationElements:
                 value = elem
                 if isOperator(value) == False:
                     value = self.__transformElementToValues(elem)
-                formattedElems.append(value)
+                formattedMember.append(value)
+        return formattedMember
 
-            # Parse equation elements and do operations
-            while len(formattedElems) > 1:
-                lenElems = len(formattedElems)
-                mulDivOpe = False
-                for i in range(0, lenElems):
-                    if isOperator(formattedElems[i]):
-                        if (formattedElems[i] == '*') or (formattedElems[i] == '/'):
-                            mulDivOpe = True
-                            break
-                for i in range(0, lenElems):
-                    if isOperator(formattedElems[i]):
-                        if (formattedElems[i] == '*') or (formattedElems[i] == '/') or (mulDivOpe == False):
-                            currentOpe = formattedElems[i - 1 : i + 2 : 1]
-                            formattedElems[i - 1] = self.operations[currentOpe[1]](currentOpe[0], currentOpe[2])
-                            del formattedElems[i:i + 2]
-                            break
-                form = ''
-                for elem in formattedElems:
-                    if isOperator(elem) == True:
-                        form += elem
-                    else:
-                        form += self.__toString(elem) 
-                leftMember = form if currentSideMember == 'left' else otherMember
-                rightMember = form if currentSideMember == 'right' else otherMember
-                self.__printStep(leftMember, rightMember) if self.__options['printSteps'] == True else 0
-            return formattedElems[0]
-
-    def __printStep(self, left:str, right:str):
+    def __printStep(self, left:str, right:str, printCurrent:bool):
         left = left.replace(' ', '')
         right = right.replace(' ', '')
         for operator in OPERATORS:
@@ -258,7 +288,8 @@ class Equation:
         printStep = left + ' = ' + right
         if (printStep != self.__lastStepPrint):
             self.__lastStepPrint = printStep
-            print(printStep)
+            self.steps.append(printStep)
+            print(printStep) if printCurrent is True else 0
 
     def getDelta(self):
         a = self.__valuesMemberLeft[2] if 2 in self.__valuesMemberLeft else 0
