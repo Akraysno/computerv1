@@ -44,7 +44,7 @@ def updateEquationOptions(string: str, equationOptions):
     return equationOptions
 
 equationOptions = {
-    'printSteps': False,
+    'printSteps': True,
     'rootsAsFraction': True
 }
 
