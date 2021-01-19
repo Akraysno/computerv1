@@ -127,7 +127,7 @@ class Equation:
                 raise ValueError('Synthax error at char ' + str(i))
             if (equation[i] == '*') and ((i == 0) or re.search('^(\*[\-|+|\s]*[0-9|x]+)', equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i] == '/') and ((i == 0) or re.search('^(\/[\-|+|\s]*[0-9]+)', equation[i:]) == None):
+            if (equation[i] == '/') and ((i == 0) or re.search('^(\/[\-|+|\s]*[0-9|x]+)', equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
             if (equation[i].isdigit()) and (re.search('^([0-9][^\^])', equation[i:]) == None) and (re.search('^([0-9])$', equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
@@ -195,6 +195,11 @@ class Equation:
         self.__equationMemberRight = rightMember
         self.__valuesMemberLeft = self.__simplify(self.__equationMemberLeft, self.__equationMemberRight)
         self.__valuesMemberRight = {0: 0}
+        keys = list(self.__valuesMemberLeft.keys())
+        keys = sorted(keys)
+        if (len(keys) > 0) and (keys[0] < 0):
+            formattedMember = self.__counterNegativeDegre(self.__valuesMemberLeft)
+            self.__valuesMemberLeft = self.__simplifyFormatted(formattedMember, [{0:0}])
         if (self.__options['printSteps'] is True) and (len(self.steps) > 1):
             print('Simplify equation:')
             for line in self.steps:
@@ -205,22 +210,32 @@ class Equation:
         self.__printStep(leftMember, rightMember, False) if self.__options['printSteps'] == True else 0
         leftFormatted = self.__convertMember(leftMember)
         rightFormatted = self.__convertMember(rightMember)
-         
-        for i in range(0, len(rightFormatted)):
-            if isOperator(rightFormatted[i]) is True:
-                if rightFormatted[i] is '-':
-                    elem = rightFormatted[i + 1]
-                    keys = list(elem.keys())
-                    key = keys[0]
-                    rightFormatted[i + 1][key] *= -1
-                    rightFormatted[i] = '+'
-            else:
+        return self.__simplifyFormatted(leftFormatted, rightFormatted)
+
+    def __simplifyFormatted(self, leftFormatted, rightFormatted):
+        if (len(rightFormatted) > 0):
+            firstElem = rightFormatted[0]
+            firstKeys = list(firstElem.keys())
+            noNullValue = False
+            for key in firstKeys:
+                if firstElem[key] != 0:
+                    noNullValue = True
+            if (len(rightFormatted) > 1) or (noNullValue is True):
+                for i in range(0, len(rightFormatted)):
+                    if isOperator(rightFormatted[i]) is True:
+                        if rightFormatted[i] == '-':
+                            elem = rightFormatted[i + 1]
+                            keys = list(elem.keys())
+                            key = keys[0]
+                            rightFormatted[i + 1][key] *= -1
+                            rightFormatted[i] = '+'
+                    else:
                         if i == 0:
-                    leftFormatted.append('+')
-                keys = list(rightFormatted[i].keys())
-                for key in keys:
-                    rightFormatted[i][key] *= -1
-            leftFormatted.append(rightFormatted[i])
+                            leftFormatted.append('+')
+                        keys = list(rightFormatted[i].keys())
+                        for key in keys:
+                            rightFormatted[i][key] *= -1
+                    leftFormatted.append(rightFormatted[i])
         rightFormatted = [{0: 0}]
         
         self.__formattedToString(leftFormatted, rightFormatted)
@@ -243,6 +258,30 @@ class Equation:
                         break
             self.__formattedToString(leftFormatted, rightFormatted)
         return leftFormatted[0]
+
+    def __counterNegativeDegre(self, member: dict):
+        keys = list(member.keys())
+        sortedKeys = sorted(keys)
+        if (len(sortedKeys) > 0) and (sortedKeys[0] < 0):
+            degre = sortedKeys[0]
+            counterDegre = abs(degre)
+            counterElem = {}
+            counterElem[counterDegre] = 1
+            formattedMember = []
+            for key in keys:
+                if member[key] != 0:
+                    if len(formattedMember) > 0:
+                        formattedMember.append('+')
+                    currentElem = {}
+                    currentElem[key] = member[key]
+                    formattedMember.append(currentElem)
+                    formattedMember.append('*')
+                    counterElem = {}
+                    counterElem[counterDegre] = 1
+                    formattedMember.append(counterElem)
+            return formattedMember
+        else:
+            return [{0: 0}]
 
     def __formattedToString(self, leftFormatted, rightFormatted):
         leftMember = ''
@@ -294,6 +333,13 @@ class Equation:
         if right[0] == ' ':
             right = right.replace(' - ', '-', 1)
         printStep = left + ' = ' + right
+        printStep = printStep.replace('  ', ' ')
+        printStep = printStep.replace('- -', '+')
+        printStep = printStep.replace('- +', '-')
+        printStep = printStep.replace('+ +', '+')
+        printStep = printStep.replace('+ -', '-')
+        printStep = printStep.replace('^ - ', '^-')
+        printStep = printStep.replace('^ + ', '^')
         if (printStep != self.__lastStepPrint):
             self.__lastStepPrint = printStep
             self.steps.append(printStep)
