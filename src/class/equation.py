@@ -392,24 +392,42 @@ class Equation:
 
     def mul(self, src: dict, dest: dict):
         res = dict()
-        for key in src:
-            if key in dest:
-                res[key + key] = src[key] * dest[key]
-                dest.pop(key, None)
-            else:
-                res[key] = src[key]
-        for key in dest:
-            res[key] = dest[key]
+        for keyS in src:
+            for keyD in dest:
+                currentValue = 0
+                currentKey = keyD + keyS
+                if currentKey in res:
+                    currentValue = res[currentKey]
+                currentValue += src[keyS] * dest[keyD]
+                res[currentKey] = currentValue
         return res
 
     def div(self, src: dict, dest: dict):
+        """
+        ⚠️ Ne fonctionne que si dest ne contient qu'un element à l'heure actuelle ⚠️
+        """
+        print('__DIV', src, dest)
+        keys = list(dest.keys())
+        keyD = keys[0] if len(keys) > 0 else None
+        if keyD is None:
+            return src
         res = dict()
-        for key in src:
-            if key in dest:
-                res[key - key] = src[key] / dest[key]
-                dest.pop(key, None)
+        for keyS in src:
+            currentValue = 0
+            if keyS == keyD:
+                if 0 in res:
+                    currentValue = res[0]
+                currentValue += src[keyS] / dest[keyD]
+                res[0] = currentValue
+            elif keyD == 0:
+                if keyS in res:
+                    currentValue = res[keyS]
+                currentValue += src[keyS] / dest[keyD]
+                res[keyS] = currentValue
             else:
-                res[key] = src[key]
-        for key in dest:
-            res[key] = dest[key]
+                currentKey = keyS - keyD
+                if currentKey in res:
+                    currentValue = res[currentKey]
+                currentValue = src[keyS] / dest[keyD]
+                res[currentKey] = currentValue
         return res
