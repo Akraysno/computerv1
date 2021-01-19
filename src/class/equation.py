@@ -64,12 +64,12 @@ class Equation:
                     else:
                         equation += ' - '
                         value *= -1
-                if i is 0: 
+                if i == 0: 
                     equation += str(value)
                 else:
-                    if value is -1:
+                    if value == -1:
                         equation += '-'
-                    elif value is not 1:
+                    elif value != 1:
                         equation += str(value)
                 if i != 0:
                     equation += 'x'
@@ -215,7 +215,7 @@ class Equation:
                     rightFormatted[i + 1][key] *= -1
                     rightFormatted[i] = '+'
             else:
-                if i is 0:
+                        if i == 0:
                     leftFormatted.append('+')
                 keys = list(rightFormatted[i].keys())
                 for key in keys:
@@ -307,8 +307,12 @@ class Equation:
 
     def resolve(self):
         keys = list(self.__valuesMemberLeft.keys())
-        keys = sorted(keys)
-        degre = keys[-1]
+        keys = sorted(keys, reverse=True)
+        degre = 0
+        for key in keys:
+            if self.__valuesMemberLeft[key] != 0:
+                degre = key
+                break
         print('Polynomial degree:', str(degre))
         # transform to fraction with : Fraction( Decimal( str( float ) ) )
         if degre > 2:
