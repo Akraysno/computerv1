@@ -29,6 +29,14 @@ class Equation:
     }
 
     def __init__(self, equation:str, options = {}):
+        self.operations = {}
+        self.equation = ''
+        self.steps = []
+        self.__valuesMemberLeft = {}
+        self.__valuesMemberRight = {}
+        self.__equationMemberLeft = ''
+        self.__equationMemberRight = ''
+        self.__lastStepPrint = ''
         self.operations = {
             '+': lambda src, dest: self.add(src, dest),
             '*': lambda src, dest: self.mul(src, dest),
