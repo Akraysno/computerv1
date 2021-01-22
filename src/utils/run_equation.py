@@ -4,17 +4,46 @@ from math import floor
 from fractions import Fraction
 from decimal import Decimal
 
+def printEquationResult(equation: Equation):
+    print('Equation           : '+equation.equation+'\n')
+    if equation.error:
+        print(equation.error)
+    else:
+        if len(equation.steps) > 0:
+            for i in range(0, len(equation.steps)):
+                if i == 0:
+                    print('Simplification     : '+equation.steps[i])
+                else:
+                    print('                     '+equation.steps[i])
+            print('')
+        print('Forme réduite      : '+equation.reduced+'\n')
+        print('Degré du polynome  : '+str(equation.polynomialDegre)+'\n')
+        if equation.polynomialDegreTooHigh is True:
+            print("Le degré du polynome est trop grand. Il doit être compris entre 0 et 2.")
+        elif equation.sidesNotEquals is True:
+            print("L'équation n'a pas de solution car les deux côtés de l'égalité ne sont pas égaux.")
+        elif equation.allNumbersAsSolution is True: 
+            print("Tous les nombres Réels (ℝ) sont solution")
+        else:
+            if equation.polynomialDegre == 2:
+                print('Delta (𝚫)          : '+str(equation.delta).rstrip('0').rstrip('.')+'\n')
+            if len(equation.roots) == 1:
+                print('La solution est    : x = '+str(equation.roots[0]))
+            elif len(equation.roots) == 2:
+                print('Les solutions sont : x1 = '+str(equation.roots[0]))
+                print('                     x2 = '+str(equation.roots[1]))
+
 def runEquation(equation:str):
     try:
         eq = Equation(equation)
-        eq.resolve()
+        printEquationResult(eq)
     except ValueError as err:
         print('Error : ' + err.args[0])
 
 def runRandomEquation():
     try:
         eq = Equation(genretateRandomValidatedEquation())
-        eq.resolve()
+        printEquationResult(eq)
     except ValueError as err:
         print('Error : ' + err.args[0])
 

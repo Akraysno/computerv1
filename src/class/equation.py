@@ -13,32 +13,48 @@ OPERATORS = ['+', '-', '*', '/']
 def isOperator(token):
     return token in OPERATORS
 
-# TODO fix values for x^-n
 class Equation:
-    __operations = {}
-    __valuesMemberLeft = {}
-    __valuesMemberRight = {}
     __equationMemberLeft = ''
     __equationMemberRight = ''
     __lastStepPrint = ''
+    __operations = {}
+    __valuesMemberLeft = {}
+    __valuesMemberRight = {}
+    allNumbersAsSolution = False
+    delta = 0
     equation = ''
+    error = ''
+    polynomialDegre = 0
+    polynomialDegreTooHigh = False
+    reduced = ''
+    roots = []
+    sidesNotEquals = False
     steps = []
 
-    def __init__(self, equation:str, options = {}):
-        self.equation = ''
-        self.steps = []
-        self.__valuesMemberLeft = {}
-        self.__valuesMemberRight = {}
+    def __init__(self, equation:str = '', options = {}):
         self.__equationMemberLeft = ''
         self.__equationMemberRight = ''
         self.__lastStepPrint = ''
         self.__operations = {
-            '+': lambda src, dest: self.add(src, dest),
-            '*': lambda src, dest: self.mul(src, dest),
-            '/': lambda src, dest: self.div(src, dest),
-            '-': lambda src, dest: self.sub(src, dest),
+            '+': lambda src, dest: self.__add(src, dest),
+            '*': lambda src, dest: self.__mul(src, dest),
+            '/': lambda src, dest: self.__div(src, dest),
+            '-': lambda src, dest: self.__sub(src, dest),
         }
-        self.__verifyAndSimplifyMembers(equation)
+        self.__valuesMemberLeft = {}
+        self.__valuesMemberRight = {}
+        self.allNumbersAsSolution = False
+        self.delta = 0
+        self.equation = equation.lower()
+        self.error = ''
+        self.polynomialDegre = 0
+        self.polynomialDegreTooHigh = False
+        self.reduced = ''
+        self.roots = []
+        self.sidesNotEquals = False
+        self.steps = []
+        self.__verifyAndSimplifyMembers()
+        self.__resolve()
     
     def __repr__(self):
         return self.__toString(self.__valuesMemberLeft) + ' = ' + self.__toString(self.__valuesMemberRight)
@@ -72,71 +88,70 @@ class Equation:
                 equation += str(value)
         return equation
 
-    def __verifyCharPosition(self, equation:str):
-        print('\nequation:', equation)
+    def __verifyAndSimplifyMembers(self):
+        self.__verifyCharPosition()
+        self.__transformEquation()
+        left = self.equation[0:self.equation.find('=')]
+        right = self.equation[self.equation.find('=') + 1: len(self.equation)]
+        self.__simplifyMembers(left, right)
 
-        equation = equation.lower()
-
+    #TODO: Replace Raised errors
+    def __verifyCharPosition(self):
         # Verify Forbidden characters
-        forbiddenChar = re.search('[^0123456789+\- *\/^x=.]+', equation)
+        forbiddenChar = re.search('[^0123456789+\- *\/^x=.]+', self.equation)
         if forbiddenChar:
-            raise ValueError('Synthax error forbidden char at position ' + str(find_nth_overlapping(equation, forbiddenChar.group(0), 1)))
+            raise ValueError('Synthax error forbidden char at position ' + str(find_nth_overlapping(self.equation, forbiddenChar.group(0), 1)))
 
         # Verify equality
-        if equation.count('=') != 1:
-            if equation.count('=') == 0:
+        if self.equation.count('=') != 1:
+            if self.equation.count('=') == 0:
                 raise ValueError('Synthax error : Missing \'=\'')
-            raise ValueError('Synthax error at char ' + str(find_nth_overlapping(equation, '=', 2)))
+            raise ValueError('Synthax error at char ' + str(find_nth_overlapping(self.equation, '=', 2)))
 
         # Search particular case: ^[+|-][0-9][.][0-9]x
-        searchFailNumber = re.search('\^([\-|+]?[0-9]*\.[0-9]|[\-|+]?[0-9]*[.]?[0-9]*\s*x{1})', equation)
+        searchFailNumber = re.search('\^([\-|+]?[0-9]*\.[0-9]|[\-|+]?[0-9]*[.]?[0-9]*\s*x{1})', self.equation)
         if searchFailNumber:
             raise ValueError('Synthax error at char ' + str(find_nth_overlapping(equation, searchFailNumber.group(0), 1) + 1))
 
         # Search particular case where dot is not between numbers
-        searchFailDot = re.search('([^0-9]\.[^0-9]|[^0-9]\.|\.[^0-9])', equation)
+        searchFailDot = re.search('([^0-9]\.[^0-9]|[^0-9]\.|\.[^0-9])', self.equation)
         if (searchFailDot):
-            raise ValueError('Synthax error at char ' + str(find_nth_overlapping(equation, searchFailDot.group(0), 1) + 1) )
+            raise ValueError('Synthax error at char ' + str(find_nth_overlapping(self.equation, searchFailDot.group(0), 1) + 1) )
 
         # Search particular case: space between numbers
-        searchFailNumber = re.search('(\d +\d)', equation)
+        searchFailNumber = re.search('(\d +\d)', self.equation)
         if searchFailNumber:
-            raise ValueError('Synthax error at char ' + str(find_nth_overlapping(equation, searchFailNumber.group(0), 1) + 1))
-
-        # TODO create exception for n / x^-k
+            raise ValueError('Synthax error at char ' + str(find_nth_overlapping(self.equation, searchFailNumber.group(0), 1) + 1))
 
         #verify char positions, x can be placed anywhere
-        maxLen = len(equation)
+        maxLen = len(self.equation)
         for i in range(0, maxLen):
-            if (i == 0) and (find_nth_overlapping('-+0123456789x', equation[i], 1) == -1):
+            if (i == 0) and (find_nth_overlapping('-+0123456789x', self.equation[i], 1) == -1):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i] == '^') and ((i == 0) or re.search('^(\^[-|+|\s]*[0-9]+)', equation[i:]) == None):
+            if (self.equation[i] == '^') and ((i == 0) or re.search('^(\^[-|+|\s]*[0-9]+)', self.equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i] == '=') and ((i == 0) or re.search('^(=[\-|+|\s]*[0-9|x]+)', equation[i:]) == None):
+            if (self.equation[i] == '=') and ((i == 0) or re.search('^(=[\-|+|\s]*[0-9|x]+)', self.equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i] == '+') and (re.search('^(\+[\-|+|\s]*[0-9|x]+)', equation[i:]) == None):
+            if (self.equation[i] == '+') and (re.search('^(\+[\-|+|\s]*[0-9|x]+)', self.equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i] == '-') and (re.search('^(\-[\-|+|\s]*[0-9|x]+)', equation[i:]) == None):
+            if (self.equation[i] == '-') and (re.search('^(\-[\-|+|\s]*[0-9|x]+)', self.equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i] == '*') and ((i == 0) or re.search('^(\*[\-|+|\s]*[0-9|x]+)', equation[i:]) == None):
+            if (self.equation[i] == '*') and ((i == 0) or re.search('^(\*[\-|+|\s]*[0-9|x]+)', self.equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i] == '/') and ((i == 0) or re.search('^(\/[\-|+|\s]*[0-9|x]+)', equation[i:]) == None):
+            if (self.equation[i] == '/') and ((i == 0) or re.search('^(\/[\-|+|\s]*[0-9|x]+)', self.equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i].isdigit()) and (re.search('^([0-9][^\^])', equation[i:]) == None) and (re.search('^([0-9])$', equation[i:]) == None):
+            if (self.equation[i].isdigit()) and (re.search('^([0-9][^\^])', self.equation[i:]) == None) and (re.search('^([0-9])$', self.equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
-            if (equation[i] == ' ') and (re.search('(\s[^\^])', equation[i:]) == None) and (re.search('^(\s)$', equation[i:]) == None):
+            if (self.equation[i] == ' ') and (re.search('(\s[^\^])', self.equation[i:]) == None) and (re.search('^(\s)$', self.equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
-        
-        return self.__transformEquation(equation)
 
-    def __transformEquation(self, equation: str):
+    def __transformEquation(self):
         # Remove spaces
-        equation = equation.replace(' ', '')
+        self.equation = self.equation.replace(' ', '')
         # Replace and remove signs [+|-]
-        equation = replaceSigns(equation)
+        self.equation = replaceSigns(self.equation)
         # Add * around x
-        equation = checkForX(equation)
-        return equation
+        self.equation = checkForX(self.equation)
 
     def __transformElementToValues(self, element: str):
         values = dict()
@@ -166,7 +181,6 @@ class Equation:
                     if element[0] == 'x':
                         degres = 1
                         if len(element) > 1:
-                            #value = value if value != 0 else 1
                             if element[1] == '^':
                                 degres = atoi(element[2:])
                             else:
@@ -176,12 +190,6 @@ class Equation:
             else:
                 values[degres] = value
         return values
-
-    def __verifyAndSimplifyMembers(self, equation:str):
-        self.equation = self.__verifyCharPosition(equation)
-        left = self.equation[0:self.equation.find('=')]
-        right = self.equation[self.equation.find('=') + 1: len(self.equation)]
-        self.__simplifyMembers(left, right)
 
     def __simplifyMembers(self, leftMember, rightMember):
         self.__equationMemberLeft = leftMember
@@ -193,14 +201,14 @@ class Equation:
         if (len(keys) > 0) and (keys[0] < 0):
             formattedMember = self.__counterNegativeDegre(self.__valuesMemberLeft)
             self.__valuesMemberLeft = self.__simplifyFormatted(formattedMember, [{0:0}])
-        if len(self.steps) > 1:
-            print('Simplify equation:')
-            for line in self.steps:
-                print('\t'+line)
-        print('Reduced form:', self)
+        if len(self.steps) > 0:
+            self.reduced = self.steps[-1]
+        else:
+            self.reduced = self.__toString(self.__valuesMemberLeft) + ' = ' + self.__toString(self.__valuesMemberRight)
+            self.reduced = self.reduced.replace('.0 ', ' ')
 
     def __simplify(self, leftMember, rightMember):
-        self.__printStep(leftMember, rightMember, False)
+        self.__addStep(leftMember, rightMember)
         leftFormatted = self.__convertMember(leftMember)
         rightFormatted = self.__convertMember(rightMember)
         return self.__simplifyFormatted(leftFormatted, rightFormatted)
@@ -289,7 +297,7 @@ class Equation:
                 rightMember += elem
             else:
                 rightMember += self.__toString(elem) 
-        self.__printStep(leftMember, rightMember, False)
+        self.__addStep(leftMember, rightMember)
 
     def __convertMember(self, member):
         formattedMember = []
@@ -315,7 +323,7 @@ class Equation:
                 formattedMember.append(value)
         return formattedMember
 
-    def __printStep(self, left:str, right:str, printCurrent:bool):
+    def __addStep(self, left:str, right:str):
         left = left.replace(' ', '')
         right = right.replace(' ', '')
         for operator in OPERATORS:
@@ -333,98 +341,76 @@ class Equation:
         printStep = printStep.replace('+ -', '-')
         printStep = printStep.replace('^ - ', '^-')
         printStep = printStep.replace('^ + ', '^')
+        printStep = printStep.replace('.0 ', ' ')
         if (printStep != self.__lastStepPrint):
             self.__lastStepPrint = printStep
             self.steps.append(printStep)
-            print(printStep) if printCurrent is True else 0
 
-    def getDelta(self):
+    def __calcDelta(self):
         a = self.__valuesMemberLeft[2] if 2 in self.__valuesMemberLeft else 0
         b = self.__valuesMemberLeft[1] if 1 in self.__valuesMemberLeft else 0
         c = self.__valuesMemberLeft[0] if 0 in self.__valuesMemberLeft else 0
-        return (math.pow(b, 2)) - (4 * a * c)
+        self.delta = (math.pow(b, 2)) - (4 * a * c)
 
-    def resolve(self):
+    def __resolve(self):
         keys = list(self.__valuesMemberLeft.keys())
         keys = sorted(keys, reverse=True)
-        degre = 0
+        self.polynomialDegre = 0
         for key in keys:
             if self.__valuesMemberLeft[key] != 0:
-                degre = key
+                self.polynomialDegre = key
                 break
-        print('Polynomial degree:', str(degre))
-        # transform to fraction with : Fraction( Decimal( str( float ) ) )
-        if degre > 2:
-            raise ValueError('Polynomial degree too high')
-        roots = self.roots()
-        if (degre == 0):
-            if (roots[0] != 0):
-                print('Equation sans solution')
-            else:
-                print('Tous les nombres sont solution')
-        if (degre == 1):
-            currentRoot = str(roots[0])
-            currentRoot = currentRoot.rstrip('0') if '.' in currentRoot else currentRoot
-            currentRoot = currentRoot.rstrip('.')
-            print('roots:\n\tx =', currentRoot)
-        if (degre == 2):
-            currentDelta = str(self.getDelta())
-            currentDelta = currentDelta.rstrip('0') if '.' in currentDelta else currentDelta
-            currentDelta = currentDelta.rstrip('.')
-            print('Delta:', currentDelta)
-            if len(roots) == 1:
-                currentRoot = str(roots[0])
-                currentRoot = currentRoot.rstrip('0') if '.' in currentRoot else currentRoot
-                currentRoot = currentRoot.rstrip('.')
-                print('roots:\n\tx =', currentRoot)
-            else:
-                currentRoot1 = str(roots[0])
-                currentRoot1 = currentRoot1.rstrip('0') if '.' in currentRoot1 else currentRoot1
-                currentRoot1 = currentRoot1.rstrip('.')
-                currentRoot2 = str(roots[1])
-                currentRoot2 = currentRoot2.rstrip('0') if '.' in currentRoot2 else currentRoot2
-                currentRoot2 = currentRoot2.rstrip('.')
-                print('roots:\n\tx1 =', currentRoot1, '\n\tx2 =', currentRoot2)
-        
-    def roots(self):
+        if self.polynomialDegre > 2:
+            self.polynomialDegreTooHigh = True
+        else:
+            self.__calcRoots()
+            if (self.polynomialDegre == 0):
+                if (self.roots[0] != 0):
+                    self.sidesNotEquals = True
+                else:
+                    self.allNumbersAsSolution = True
+                self.roots = []
+
+    def __calcRoots(self):
         values = self.__valuesMemberLeft
         a = values[2] if 2 in values else 0
         b = values[1] if 1 in values else 0
         c = values[0] if 0 in values else 0
         if a != 0:
-            delta = self.getDelta()
-            if delta > 0:
-                rootOne = (- b - math.sqrt(delta)) / (2 * a)
-                rootTwo = (- b + math.sqrt(delta)) / (2 * a)
-                rootOneAsString = str(rootOne).rstrip('0').rstrip('.') if rootOne != 0 else '0'
-                rootTwoAsString = str(rootTwo).rstrip('0').rstrip('.') if rootTwo != 0 else '0'
-                rootOneAsFraction = Fraction(rootOne)
-                rootTwoAsFraction = Fraction(rootTwo)
-                rootOneAsFraction2 = Fraction(rootOneAsString)
-                rootTwoAsFraction2 = Fraction(rootTwoAsString)
-                #print(rootOne, rootOneAsString, rootOneAsFraction, rootOneAsFraction2)
-                #print(rootTwo, rootTwoAsString, rootTwoAsFraction, rootTwoAsFraction2)
-                return [rootOneAsString, rootTwoAsString]
-            if delta == 0:
+            self.__calcDelta()
+            if self.delta > 0:
+                rootOne = (- b - math.sqrt(self.delta)) / (2 * a)
+                rootTwo = (- b + math.sqrt(self.delta)) / (2 * a)
+                rootOneAsString = str(rootOne).replace('.0 ', ' ')
+                rootTwoAsString = str(rootTwo).replace('.0 ', ' ')
+                self.roots = [rootOneAsString, rootTwoAsString]
+            if self.delta == 0:
                 root = (- b) / (2 * a)
-                rootAsString = str(root).rstrip('0').rstrip('.') if root != 0 else '0'
-                return [(- b) / (2 * a)]
-            if delta < 0:
+                rootAsString = str(root).replace('.0 ', ' ')
+                self.roots = [(- b) / (2 * a)]
+            if self.delta < 0:
+                currentDelta = self.delta * -1
                 partOne = (- b ) / (2 * a)
-                partTwo = (math.sqrt(math.fabs(delta))) / (2 * a)
+                partTwo = (math.sqrt(currentDelta)) / (2 * a)
                 rootOnePartTwoSign = ' + ' if (partTwo < 0) else ' - '
                 rootTwoPartTwoSign = ' - ' if (partTwo < 0) else ' + '
-                partOneAsString = str(partOne).rstrip('0').rstrip('.') if partOne != 0 else ''
-                partTwoAsString = str(math.fabs(partTwo)).rstrip('0').rstrip('.') if partTwo != 0 else ''
+                partOneAsString = str(partOne).replace('.0 ', ' ')
+                partTwoAsString = str(math.fabs(partTwo)).replace('.0 ', ' ')
                 root_one = partOneAsString + (rootOnePartTwoSign if (partOne != 0) or (partOne < 0) else '') + partTwoAsString +'i'
                 root_two = partOneAsString + (rootOnePartTwoSign if (partOne != 0) or (partOne < 0) else '') + partTwoAsString +'i'
-                return [root_one, root_two]
+                self.roots = [root_one, root_two]
         elif b != 0:
-            return [- c / b]
+            self.roots = [- c / b]
         else :
-            return [c]
+            self.roots = [c]
+        for i in range(0, len(self.roots)):
+            self.roots[i] = str(self.roots[i]).replace('.0 ', ' ')
+            self.roots[i] = str(self.roots[i]).rstrip('0').rstrip('.')
+            self.roots[i] = str(self.roots[i]).replace('.0i', 'i')
+            self.roots[i] = '0' if str(self.roots[i]) == '-0' else self.roots[i]
+            
 
-    def add(self, src: dict, dest: dict):
+    def __add(self, src: dict, dest: dict):
         for key in dest:
             if key in src:
                 src[key] += dest[key]
@@ -432,7 +418,7 @@ class Equation:
                 src[key] = dest[key]
         return src
 
-    def sub(self, src: dict, dest: dict):
+    def __sub(self, src: dict, dest: dict):
         for key in dest:
             if key in src:
                 src[key] -= dest[key]
@@ -440,7 +426,7 @@ class Equation:
                 src[key] = dest[key] * -1
         return src
 
-    def mul(self, src: dict, dest: dict):
+    def __mul(self, src: dict, dest: dict):
         res = dict()
         for keyS in src:
             for keyD in dest:
@@ -452,7 +438,7 @@ class Equation:
                 res[currentKey] = currentValue
         return res
 
-    def div(self, src: dict, dest: dict):
+    def __div(self, src: dict, dest: dict):
         """
         ⚠️ Ne fonctionne que si dest ne contient qu'un element à l'heure actuelle ⚠️
         """
