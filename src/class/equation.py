@@ -392,13 +392,43 @@ class Equation:
                 currentDelta = self.delta * -1
                 partOne = (- b ) / (2 * a)
                 partTwo = (math.sqrt(currentDelta)) / (2 * a)
-                rootOnePartTwoSign = ' + ' if (partTwo < 0) else ' - '
-                rootTwoPartTwoSign = ' - ' if (partTwo < 0) else ' + '
-                partOneAsString = str(partOne).replace('.0 ', ' ')
-                partTwoAsString = str(math.fabs(partTwo)).replace('.0 ', ' ')
-                root_one = partOneAsString + (rootOnePartTwoSign if (partOne != 0) or (partOne < 0) else '') + partTwoAsString +'i'
-                root_two = partOneAsString + (rootOnePartTwoSign if (partOne != 0) or (partOne < 0) else '') + partTwoAsString +'i'
-                self.roots = [root_one, root_two]
+                print(partOne)
+                print(partTwo)
+                rootOnePartTwoSign = '-' if (partTwo < 0) else '+'
+                rootTwoPartTwoSign = '+' if (partTwo < 0) else '-'
+                if partTwo < 0:
+                    partTwo = partTwo * -1
+                rootOne = ''
+                rootTwo = ''
+                if partOne != 0:
+                    rootOne = str(partOne)
+                    rootTwo = str(partOne)
+                if partTwo != 0:
+                    rootOneSpaces = False
+                    rootTwoSpaces = False
+
+                    if len(rootOne) > 0:
+                        rootOne += ' '
+                        rootOneSpaces = True
+                    elif rootOnePartTwoSign == '-':
+                        rootOne += rootOnePartTwoSign
+                    if rootOneSpaces is True:
+                        rootOne += ' '
+                    if partTwo != 1:
+                        rootOne += str(partTwo)
+                    rootOne += 'i'
+
+                    if len(rootTwo) > 0:
+                        rootTwo += ' '
+                        rootTwoSpaces = True
+                    elif rootTwoPartTwoSign == '-':
+                        rootTwo += rootTwoPartTwoSign
+                    if rootTwoSpaces is True:
+                        rootTwo += ' '
+                    if partTwo != 1:
+                        rootTwo += str(partTwo)
+                    rootTwo += 'i'
+                self.roots = [rootOne, rootTwo]
         elif b != 0:
             self.roots = [- c / b]
         else :
