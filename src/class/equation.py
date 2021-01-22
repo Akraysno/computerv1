@@ -15,21 +15,16 @@ def isOperator(token):
 
 # TODO fix values for x^-n
 class Equation:
-    operations = {}
-    equation = ''
-    steps = []
+    __operations = {}
     __valuesMemberLeft = {}
     __valuesMemberRight = {}
     __equationMemberLeft = ''
     __equationMemberRight = ''
     __lastStepPrint = ''
-    __options = {
-        'printSteps': False,
-        'rootsAsFraction': True
-    }
+    equation = ''
+    steps = []
 
     def __init__(self, equation:str, options = {}):
-        self.operations = {}
         self.equation = ''
         self.steps = []
         self.__valuesMemberLeft = {}
@@ -37,14 +32,12 @@ class Equation:
         self.__equationMemberLeft = ''
         self.__equationMemberRight = ''
         self.__lastStepPrint = ''
-        self.operations = {
+        self.__operations = {
             '+': lambda src, dest: self.add(src, dest),
             '*': lambda src, dest: self.mul(src, dest),
             '/': lambda src, dest: self.div(src, dest),
             '-': lambda src, dest: self.sub(src, dest),
         }
-        self.__options['printSteps'] = True if (options['printSteps'] and options['printSteps'] == True) else False
-        self.__options['rootsAsFraction'] = True if (options['rootsAsFraction'] and options['rootsAsFraction'] == True) else False
         self.__verifyAndSimplifyMembers(equation)
     
     def __repr__(self):
@@ -200,14 +193,14 @@ class Equation:
         if (len(keys) > 0) and (keys[0] < 0):
             formattedMember = self.__counterNegativeDegre(self.__valuesMemberLeft)
             self.__valuesMemberLeft = self.__simplifyFormatted(formattedMember, [{0:0}])
-        if (self.__options['printSteps'] is True) and (len(self.steps) > 1):
+        if len(self.steps) > 1:
             print('Simplify equation:')
             for line in self.steps:
                 print('\t'+line)
         print('Reduced form:', self)
 
     def __simplify(self, leftMember, rightMember):
-        self.__printStep(leftMember, rightMember, False) if self.__options['printSteps'] == True else 0
+        self.__printStep(leftMember, rightMember, False)
         leftFormatted = self.__convertMember(leftMember)
         rightFormatted = self.__convertMember(rightMember)
         return self.__simplifyFormatted(leftFormatted, rightFormatted)
@@ -253,7 +246,7 @@ class Equation:
                 if isOperator(leftFormatted[i]):
                     if (leftFormatted[i] == '*') or (leftFormatted[i] == '/') or (mulDivOpe == False):
                         currentOpe = leftFormatted[i - 1 : i + 2 : 1]
-                        leftFormatted[i - 1] = self.operations[currentOpe[1]](currentOpe[0], currentOpe[2])
+                        leftFormatted[i - 1] = self.__operations[currentOpe[1]](currentOpe[0], currentOpe[2])
                         del leftFormatted[i:i + 2]
                         break
             self.__formattedToString(leftFormatted, rightFormatted)
@@ -296,7 +289,7 @@ class Equation:
                 rightMember += elem
             else:
                 rightMember += self.__toString(elem) 
-        self.__printStep(leftMember, rightMember, False) if self.__options['printSteps'] == True else 0
+        self.__printStep(leftMember, rightMember, False)
 
     def __convertMember(self, member):
         formattedMember = []
@@ -394,7 +387,6 @@ class Equation:
                 print('roots:\n\tx1 =', currentRoot1, '\n\tx2 =', currentRoot2)
         
     def roots(self):
-        #print(self.__options)
         values = self.__valuesMemberLeft
         a = values[2] if 2 in values else 0
         b = values[1] if 1 in values else 0
@@ -464,7 +456,6 @@ class Equation:
         """
         ⚠️ Ne fonctionne que si dest ne contient qu'un element à l'heure actuelle ⚠️
         """
-        print('__DIV', src, dest)
         keys = list(dest.keys())
         keyD = keys[0] if len(keys) > 0 else None
         if keyD is None:

@@ -17,37 +17,6 @@ def exit():
     print('A la prochaine !')
     os._exit(0)
 
-def updateEquationOptions(string: str, equationOptions):
-    options = string.split()
-    options.pop(0)
-    if (len(options) > 0):
-        for opt in options:
-            if (re.search('^(-s|--steps)=', opt)):
-                opts = opt.split('=')
-                opts.pop(0)
-                if len(opts) > 0 and (opts[0] == 'false' or opts[0] == 'true'):
-                    equationOptions['printSteps'] = False if opts[0] == 'false' else True
-                else:
-                    print('Invalid steps option value : ' + opts[0])
-            elif (re.search('^(-f|--fraction)=', opt)):
-                opts = opt.split('=')
-                opts.pop(0)
-                if len(opts) > 0 and (opts[0] == 'false' or opts[0] == 'true'):
-                    equationOptions['rootsAsFraction'] = False if opts[0] == 'false' else True
-                else:
-                    print('Invalid fraction option value : ' + opts[0])
-            else:
-                print('Invalid option : ' + opt)
-    else:
-        print('\tPrint steps by passing steps argument to true:\n\t\t[(-s | --steps)=(true | false)]\n\t\tCurrent value : ' + 'false' if equationOptions['printSteps'] == False else 'true')
-        print('\tPrint roots with fractions by passing fraction argument to true:\n\t\t[(-f | --fraction)=(true | false)]\n\t\tCurrent value : ' + 'false' if equationOptions['rootsAsFraction'] == False else 'true')
-    return equationOptions
-
-equationOptions = {
-    'printSteps': True,
-    'rootsAsFraction': True
-}
-
 #Add 'man' and 'help' command
 try:
     while True:
@@ -57,13 +26,17 @@ try:
         if len(equationInput) > 0:
             if (equationInput == 'q') or (equationInput == 'quit') or (equationInput == 'exit'):
                 exit()
+            elif equationInput == 't':
+                runEquation('3x^2 + x - 4 +8x - 4x^2 + 2 = -2x-2')
+            elif equationInput == 'g':
+                runEquation('3/3/x=0')
+            elif equationInput == 'g2':
+                runEquation('3x^2 + x - 4 +8x - 4x^-2 + 2 = -2x-2')
             elif (equationInput == 'r') or (equationInput == 'ran') or (equationInput == 'random'):
-                runRandomEquation(equationOptions)
+                runRandomEquation()
                 continue
-            elif (len(equationInput) > 0) and ((equationInput.split()[0] == 'o') or (equationInput.split()[0] == 'options')):
-                equationOptions = updateEquationOptions(equationInput, equationOptions)
             else:
-                runEquation(equationInput, equationOptions)
+                runEquation(equationInput)
 except EOFError:
     print('\nError: EOFError')
     exit()

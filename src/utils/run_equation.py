@@ -4,16 +4,16 @@ from math import floor
 from fractions import Fraction
 from decimal import Decimal
 
-def runEquation(equation:str, equationOptions= {}):
+def runEquation(equation:str):
     try:
-        eq = Equation(equation, equationOptions)
+        eq = Equation(equation)
         eq.resolve()
     except ValueError as err:
         print('Error : ' + err.args[0])
 
-def runRandomEquation(equationOptions = {}):
+def runRandomEquation():
     try:
-        eq = Equation(genretateRandomValidatedEquation(), equationOptions)
+        eq = Equation(genretateRandomValidatedEquation())
         eq.resolve()
     except ValueError as err:
         print('Error : ' + err.args[0])
