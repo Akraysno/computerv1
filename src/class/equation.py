@@ -16,8 +16,8 @@ class Equation:
     delta = 0
     equation = ''
     error = ''
-    polynomialDegre = 0
-    polynomialDegreTooHigh = False
+    polynomialDegree = 0
+    polynomialDegreeTooHigh = False
     reduced = ''
     roots = []
     sidesNotEquals = False
@@ -39,8 +39,8 @@ class Equation:
         self.delta = 0
         self.equation = equation.lower()
         self.error = ''
-        self.polynomialDegre = 0
-        self.polynomialDegreTooHigh = False
+        self.polynomialDegree = 0
+        self.polynomialDegreeTooHigh = False
         self.reduced = ''
         self.roots = []
         self.sidesNotEquals = False
@@ -365,16 +365,16 @@ class Equation:
     def __resolve(self):
         keys = list(self.__valuesMemberLeft.keys())
         keys = sorted(keys, reverse=True)
-        self.polynomialDegre = 0
+        self.polynomialDegree = 0
         for key in keys:
             if self.__valuesMemberLeft[key] != 0:
-                self.polynomialDegre = key
+                self.polynomialDegree = key
                 break
-        if self.polynomialDegre > 2:
-            self.polynomialDegreTooHigh = True
+        if self.polynomialDegree > 2:
+            self.polynomialDegreeTooHigh = True
         else:
             self.__calcRoots()
-            if (self.polynomialDegre == 0):
+            if (self.polynomialDegree == 0):
                 if (self.roots[0] != 0):
                     self.sidesNotEquals = True
                 else:
@@ -576,8 +576,8 @@ class Equation:
         res['delta'] = self.delta,
         res['equation'] = self.equation,
         res['error'] = self.error,
-        res['polynomialDegre'] = self.polynomialDegre,
-        res['polynomialDegreTooHigh'] = self.polynomialDegreTooHigh,
+        res['polynomialDegree'] = self.polynomialDegree,
+        res['polynomialDegreeTooHigh'] = self.polynomialDegreeTooHigh,
         res['reduced'] = self.reduced,
         res['roots'] = self.roots,
         res['sidesNotEquals'] = self.sidesNotEquals,
