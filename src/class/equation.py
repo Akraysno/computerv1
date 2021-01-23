@@ -1,12 +1,5 @@
 import math
 import re
-from utils import atoi
-from utils import atof
-from utils import checkForX
-from utils import replaceSigns
-from utils import find_nth_overlapping
-from fractions import Fraction
-from decimal import Decimal
 
 OPERATORS = ['+', '-', '*', '/']
 
@@ -100,33 +93,33 @@ class Equation:
         # Verify Forbidden characters
         forbiddenChar = re.search('[^0123456789+\- *\/^x=.]+', self.equation)
         if forbiddenChar:
-            raise ValueError('Synthax error forbidden char at position ' + str(find_nth_overlapping(self.equation, forbiddenChar.group(0), 1)))
+            raise ValueError('Synthax error forbidden char at position ' + str(self.__findNthOverlapping(self.equation, forbiddenChar.group(0), 1)))
 
         # Verify equality
         if self.equation.count('=') != 1:
             if self.equation.count('=') == 0:
                 raise ValueError('Synthax error : Missing \'=\'')
-            raise ValueError('Synthax error at char ' + str(find_nth_overlapping(self.equation, '=', 2)))
+            raise ValueError('Synthax error at char ' + str(self.__findNthOverlapping(self.equation, '=', 2)))
 
         # Search particular case: ^[+|-][0-9][.][0-9]x
         searchFailNumber = re.search('\^([\-|+]?[0-9]*\.[0-9]|[\-|+]?[0-9]*[.]?[0-9]*\s*x{1})', self.equation)
         if searchFailNumber:
-            raise ValueError('Synthax error at char ' + str(find_nth_overlapping(equation, searchFailNumber.group(0), 1) + 1))
+            raise ValueError('Synthax error at char ' + str(self.__findNthOverlapping(equation, searchFailNumber.group(0), 1) + 1))
 
         # Search particular case where dot is not between numbers
         searchFailDot = re.search('([^0-9]\.[^0-9]|[^0-9]\.|\.[^0-9])', self.equation)
         if (searchFailDot):
-            raise ValueError('Synthax error at char ' + str(find_nth_overlapping(self.equation, searchFailDot.group(0), 1) + 1) )
+            raise ValueError('Synthax error at char ' + str(self.__findNthOverlapping(self.equation, searchFailDot.group(0), 1) + 1) )
 
         # Search particular case: space between numbers
         searchFailNumber = re.search('(\d +\d)', self.equation)
         if searchFailNumber:
-            raise ValueError('Synthax error at char ' + str(find_nth_overlapping(self.equation, searchFailNumber.group(0), 1) + 1))
+            raise ValueError('Synthax error at char ' + str(self.__findNthOverlapping(self.equation, searchFailNumber.group(0), 1) + 1))
 
         #verify char positions, x can be placed anywhere
         maxLen = len(self.equation)
         for i in range(0, maxLen):
-            if (i == 0) and (find_nth_overlapping('-+0123456789x', self.equation[i], 1) == -1):
+            if (i == 0) and (self.__findNthOverlapping('-+0123456789x', self.equation[i], 1) == -1):
                 raise ValueError('Synthax error at char ' + str(i))
             if (self.equation[i] == '^') and ((i == 0) or re.search('^(\^[-|+|\s]*[0-9]+)', self.equation[i:]) == None):
                 raise ValueError('Synthax error at char ' + str(i))
@@ -149,9 +142,9 @@ class Equation:
         # Remove spaces
         self.equation = self.equation.replace(' ', '')
         # Replace and remove signs [+|-]
-        self.equation = replaceSigns(self.equation)
+        self.equation = self.__replaceSigns(self.equation)
         # Add * around x
-        self.equation = checkForX(self.equation)
+        self.equation = self.__checkForX(self.equation)
 
     def __transformElementToValues(self, element: str):
         values = dict()
@@ -160,7 +153,7 @@ class Equation:
             degres:int = 0
             i:int = 0
             if (len(element) > 0):
-                value = atof(element)
+                value = self.__atof(element)
                 valueIsNeg = True if element[0] == '-' else False
                 if element[0] == '-' or element[0] == '+':
                     i = 1
@@ -182,9 +175,9 @@ class Equation:
                         degres = 1
                         if len(element) > 1:
                             if element[1] == '^':
-                                degres = atoi(element[2:])
+                                degres = self.__atoi(element[2:])
                             else:
-                                value = value * atoi(element[1:]) if value != 0 else atoi(element[1:])
+                                value = value * self.__atoi(element[1:]) if value != 0 else self.__atoi(element[1:])
             if degres in values:
                 values[degres] += value
             else:
@@ -437,8 +430,7 @@ class Equation:
             self.roots[i] = str(self.roots[i]).replace('.0 ', ' ')
             self.roots[i] = str(self.roots[i]).rstrip('0').rstrip('.')
             self.roots[i] = str(self.roots[i]).replace('.0i', 'i')
-            self.roots[i] = '0' if str(self.roots[i]) == '-0' else self.roots[i]
-            
+            self.roots[i] = '0' if str(self.roots[i]) == '-0' else self.roots[i]     
 
     def __add(self, src: dict, dest: dict):
         for key in dest:
@@ -496,3 +488,69 @@ class Equation:
                 currentValue = src[keyS] / dest[keyD]
                 res[currentKey] = currentValue
         return res
+
+    def __replaceSigns(self, string: str):
+        while True:
+            string = string.replace('-+', '-')
+            string = string.replace('+-', '-')
+            string = string.replace('--', '+')
+            string = string.replace('++', '+')
+            string = string.replace('*+', '*')
+            string = string.replace('/+', '/')
+            if (string.find('-+') == -1) and (string.find('+-') == -1) and (string.find('++') == -1) and (string.find('--') == -1) and (string.find('*+') == -1) and (string.find('/+') == -1):
+                break
+        return string
+
+    def __replaceString(self, text:str, start_index:int, lengthToReplace: int, replacement:str = ''):
+        return text[0:start_index] + replacement + text[start_index + lengthToReplace:]
+
+    def __checkForX(self, member: str, replaceBefore: bool = False):
+        i = 0
+        while i < len(member) - 1:
+            if member[i] == 'x':
+                if (replaceBefore == True) and (i > 0) and (member[i - 1].isdigit()):
+                    member = self.__replaceString(member, i, 1, '*x')
+                    i = i - 1
+                elif (i < len(member) - 1) and (member[i + 1].isdigit()):
+                    member = self.__replaceString(member, i, 1, 'x*')
+            i += 1
+        return member
+
+    def __atoi(self, string:str):
+        sign = 1
+        i = 0
+        if string[0] == '-':
+            sign = -1
+            i = 1
+
+        if string[0] == '+':
+            sign = 1
+            i = 1
+
+        num = 0
+        while i < len(string):
+            if '0' <= string[i] <= '9':
+                num = num * 10 + ord(string[i]) - ord('0')
+            else:
+                break
+            i += 1
+        return num * sign
+
+    def __atof(self, string:str):
+        p = re.compile('^([+\|-]?[\d]+(\.[\d]*)?)')
+        m = p.match(string)
+        if m:
+            result = m.groups()[0]
+            if '.' in result:
+                return float(result)
+            else:
+                return int(result)
+        else:
+            return 0
+
+    def __findNthOverlapping(self, haystack, needle, n):
+        start = haystack.find(needle)
+        while start >= 0 and n > 1:
+            start = haystack.find(needle, start+1)
+            n -= 1
+        return start
