@@ -6,14 +6,21 @@ from run_equation import runRandomEquation
 
 def signal_handler(sig, frame):
     if (sig == 2):
-        print('\n\nUse \'exit\' or \'quit\' commands next time !')
         exit()
 
 def exit():
-    print('A la prochaine !')
     os._exit(0)
 
-#Add 'man' and 'help' command
+def help():
+    print('\033[4mCommandes disponibles :\033[0m')
+    print('\t\033[1mrandom\033[0m : Générer une équation aléatoire')
+    print('\t\033[1mexit\033[0m : Quitter le programme')
+    print('')
+    print('\033[4mExemple d\'équations valides :\033[0m')
+    print('\t3x + 4x^2 - 5 = 0')
+    print('\t2x = 3')
+    print('\tx^0 + 1 = x^1')
+
 try:
     while True:
         signal.signal(signal.SIGINT, signal_handler)
@@ -24,6 +31,9 @@ try:
                 exit()
             elif (equationInput == 'r') or (equationInput == 'ran') or (equationInput == 'random'):
                 runRandomEquation()
+                continue
+            elif (equationInput == 'h') or (equationInput == 'help'):
+                help()
                 continue
             else:
                 runEquation(equationInput)
