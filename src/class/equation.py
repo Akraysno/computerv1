@@ -1,5 +1,4 @@
-import math
-import re
+import math, re, json
 
 OPERATORS = ['+', '-', '*', '/']
 
@@ -46,8 +45,8 @@ class Equation:
         self.roots = []
         self.sidesNotEquals = False
         self.steps = []
-        self.__verifyAndSimplifyMembers()
-        self.__resolve()
+        if self.__verifyAndSimplifyMembers() is True:
+            self.__resolve()
     
     def __repr__(self):
         return self.__toString(self.__valuesMemberLeft) + ' = ' + self.__toString(self.__valuesMemberRight)
@@ -82,61 +81,79 @@ class Equation:
         return equation
 
     def __verifyAndSimplifyMembers(self):
-        self.__verifyCharPosition()
-        self.__transformEquation()
-        left = self.equation[0:self.equation.find('=')]
-        right = self.equation[self.equation.find('=') + 1: len(self.equation)]
-        self.__simplifyMembers(left, right)
+        self.equation = self.equation.replace('²', '^2')
+        if self.__verifyCharPosition() is True:
+            self.__transformEquation()
+            left = self.equation[0:self.equation.find('=')]
+            right = self.equation[self.equation.find('=') + 1: len(self.equation)]
+            self.__simplifyMembers(left, right)
+            return True
+        return False
 
-    #TODO: Replace Raised errors
     def __verifyCharPosition(self):
         # Verify Forbidden characters
         forbiddenChar = re.search('[^0123456789+\- *\/^x=.]+', self.equation)
         if forbiddenChar:
-            raise ValueError('Synthax error forbidden char at position ' + str(self.__findNthOverlapping(self.equation, forbiddenChar.group(0), 1)))
+            self.error = 'Synthax error: Caractère non autorisé à la position '+str(self.__findNthOverlapping(self.equation, forbiddenChar.group(0), 1))+'.'
+            return False
 
         # Verify equality
         if self.equation.count('=') != 1:
             if self.equation.count('=') == 0:
-                raise ValueError('Synthax error : Missing \'=\'')
-            raise ValueError('Synthax error at char ' + str(self.__findNthOverlapping(self.equation, '=', 2)))
+                self.error = 'Synthax error: Caractère \'=\' manquant.'
+                return False
+            self.error = 'Synthax error: Caractère \'=\' en trop à la position ' + str(self.__findNthOverlapping(self.equation, '=', 2))+'.'
+            return False
 
         # Search particular case: ^[+|-][0-9][.][0-9]x
-        searchFailNumber = re.search('\^([\-|+]?[0-9]*\.[0-9]|[\-|+]?[0-9]*[.]?[0-9]*\s*x{1})', self.equation)
+        searchFailNumber = re.search('^\^|\^$|\^([\-|+]?[0-9]*\.[0-9]*|[\-|+]?[0-9]*[.]?[0-9]*\s*x{1})', self.equation)
         if searchFailNumber:
-            raise ValueError('Synthax error at char ' + str(self.__findNthOverlapping(equation, searchFailNumber.group(0), 1) + 1))
+            self.error = 'Synthax error: Caractère mal placé à la position ' + str(self.__findNthOverlapping(self.equation, searchFailNumber.group(0), 1) + 1)+'.'
+            return False
 
         # Search particular case where dot is not between numbers
-        searchFailDot = re.search('([^0-9]\.[^0-9]|[^0-9]\.|\.[^0-9])', self.equation)
+        searchFailDot = re.search('([^0-9]\.[^0-9]|[^0-9]\.|\.[^0-9]|\.[0-9]\.|\.$|^\.)', self.equation)
         if (searchFailDot):
-            raise ValueError('Synthax error at char ' + str(self.__findNthOverlapping(self.equation, searchFailDot.group(0), 1) + 1) )
+            self.error = 'Synthax error: Caractère mal placé à la position ' + str(self.__findNthOverlapping(self.equation, searchFailDot.group(0), 1) + 1)+'.'
+            return False
 
         # Search particular case: space between numbers
         searchFailNumber = re.search('(\d +\d)', self.equation)
         if searchFailNumber:
-            raise ValueError('Synthax error at char ' + str(self.__findNthOverlapping(self.equation, searchFailNumber.group(0), 1) + 1))
+            self.error = 'Synthax error: Caractère mal placé à la position ' + str(self.__findNthOverlapping(self.equation, searchFailNumber.group(0), 1) + 1)+'.'
+            return False
 
         #verify char positions, x can be placed anywhere
         maxLen = len(self.equation)
         for i in range(0, maxLen):
             if (i == 0) and (self.__findNthOverlapping('-+0123456789x', self.equation[i], 1) == -1):
-                raise ValueError('Synthax error at char ' + str(i))
+                self.error = 'Synthax error: Caractère mal placé à la position ' + str(i)+'.'
+                return False
             if (self.equation[i] == '^') and ((i == 0) or re.search('^(\^[-|+|\s]*[0-9]+)', self.equation[i:]) == None):
-                raise ValueError('Synthax error at char ' + str(i))
+                self.error = 'Synthax error: Caractère mal placé à la position ' + str(i)+'.'
+                return False
             if (self.equation[i] == '=') and ((i == 0) or re.search('^(=[\-|+|\s]*[0-9|x]+)', self.equation[i:]) == None):
-                raise ValueError('Synthax error at char ' + str(i))
+                self.error = 'Synthax error: Caractère mal placé à la position ' + str(i)+'.'
+                return False
             if (self.equation[i] == '+') and (re.search('^(\+[\-|+|\s]*[0-9|x]+)', self.equation[i:]) == None):
-                raise ValueError('Synthax error at char ' + str(i))
+                self.error = 'Synthax error: Caractère mal placé à la position ' + str(i)+'.'
+                return False
             if (self.equation[i] == '-') and (re.search('^(\-[\-|+|\s]*[0-9|x]+)', self.equation[i:]) == None):
-                raise ValueError('Synthax error at char ' + str(i))
+                self.error = 'Synthax error: Caractère mal placé à la position ' + str(i)+'.'
+                return False
             if (self.equation[i] == '*') and ((i == 0) or re.search('^(\*[\-|+|\s]*[0-9|x]+)', self.equation[i:]) == None):
-                raise ValueError('Synthax error at char ' + str(i))
+                self.error = 'Synthax error: Caractère mal placé à la position ' + str(i)+'.'
+                return False
             if (self.equation[i] == '/') and ((i == 0) or re.search('^(\/[\-|+|\s]*[0-9|x]+)', self.equation[i:]) == None):
-                raise ValueError('Synthax error at char ' + str(i))
+                self.error = 'Synthax error: Caractère mal placé à la position ' + str(i)+'.'
+                return False
             if (self.equation[i].isdigit()) and (re.search('^([0-9][^\^])', self.equation[i:]) == None) and (re.search('^([0-9])$', self.equation[i:]) == None):
-                raise ValueError('Synthax error at char ' + str(i))
+                self.error = 'Synthax error: Caractère mal placé à la position ' + str(i)+'.'
+                return False
             if (self.equation[i] == ' ') and (re.search('(\s[^\^])', self.equation[i:]) == None) and (re.search('^(\s)$', self.equation[i:]) == None):
-                raise ValueError('Synthax error at char ' + str(i))
+                self.error = 'Synthax error: Caractère mal placé à la position ' + str(i)+'.'
+                return False
+        return True
 
     def __transformEquation(self):
         # Remove spaces
@@ -385,8 +402,6 @@ class Equation:
                 currentDelta = self.delta * -1
                 partOne = (- b ) / (2 * a)
                 partTwo = (math.sqrt(currentDelta)) / (2 * a)
-                print(partOne)
-                print(partTwo)
                 rootOnePartTwoSign = '-' if (partTwo < 0) else '+'
                 rootTwoPartTwoSign = '+' if (partTwo < 0) else '-'
                 if partTwo < 0:
@@ -554,3 +569,17 @@ class Equation:
             start = haystack.find(needle, start+1)
             n -= 1
         return start
+
+    def toJSON(self):
+        res = {}
+        res['allNumbersAsSolution'] = self.allNumbersAsSolution,
+        res['delta'] = self.delta,
+        res['equation'] = self.equation,
+        res['error'] = self.error,
+        res['polynomialDegre'] = self.polynomialDegre,
+        res['polynomialDegreTooHigh'] = self.polynomialDegreTooHigh,
+        res['reduced'] = self.reduced,
+        res['roots'] = self.roots,
+        res['sidesNotEquals'] = self.sidesNotEquals,
+        res['steps'] = self.steps
+        return json.dumps(res)

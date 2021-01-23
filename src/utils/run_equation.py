@@ -9,7 +9,7 @@ def printEquationResult(equation: Equation):
     if equation.error:
         print(equation.error)
     else:
-        if len(equation.steps) > 0:
+        if len(equation.steps) > 1:
             for i in range(0, len(equation.steps)):
                 if i == 0:
                     print('Simplification     : '+equation.steps[i])
