@@ -1,15 +1,11 @@
 import math, re, json
 
-OPERATORS = ['+', '-', '*', '/']
-
-def isOperator(token):
-    return token in OPERATORS
-
 class Equation:
     __equationMemberLeft = ''
     __equationMemberRight = ''
     __lastStepPrint = ''
     __operations = {}
+    __operators = ['+', '-', '*', '/']
     __valuesMemberLeft = {}
     __valuesMemberRight = {}
     allNumbersAsSolution = False
@@ -33,6 +29,7 @@ class Equation:
             '/': lambda src, dest: self.__div(src, dest),
             '-': lambda src, dest: self.__sub(src, dest),
         }
+        self.__operators = ['+', '-', '*', '/']
         self.__valuesMemberLeft = {}
         self.__valuesMemberRight = {}
         self.allNumbersAsSolution = False
@@ -224,6 +221,7 @@ class Equation:
         return self.__simplifyFormatted(leftFormatted, rightFormatted)
 
     def __simplifyFormatted(self, leftFormatted, rightFormatted):
+        #Move elements in right member to the left member
         if (len(rightFormatted) > 0):
             firstElem = rightFormatted[0]
             firstKeys = list(firstElem.keys())
@@ -231,9 +229,15 @@ class Equation:
             for key in firstKeys:
                 if firstElem[key] != 0:
                     noNullValue = True
+                    break
             if (len(rightFormatted) > 1) or (noNullValue is True):
+                multiplicateOperator = False
                 for i in range(0, len(rightFormatted)):
-                    if isOperator(rightFormatted[i]) is True:
+                    if self.__isOperator(rightFormatted[i]) is True:
+                        if (rightFormatted[i] == '*') or (rightFormatted[i] == '/'):
+                            multiplicateOperator = True
+                        else:
+                            multiplicateOperator = False
                         if rightFormatted[i] == '-':
                             elem = rightFormatted[i + 1]
                             keys = list(elem.keys())
@@ -244,8 +248,9 @@ class Equation:
                         if i == 0:
                             leftFormatted.append('+')
                         keys = list(rightFormatted[i].keys())
-                        for key in keys:
-                            rightFormatted[i][key] *= -1
+                        if multiplicateOperator is False:
+                            for key in keys:
+                                rightFormatted[i][key] *= -1
                     leftFormatted.append(rightFormatted[i])
         rightFormatted = [{0: 0}]
         
@@ -256,12 +261,12 @@ class Equation:
             lenElems = len(leftFormatted)
             mulDivOpe = False
             for i in range(0, lenElems):
-                if isOperator(leftFormatted[i]):
+                if self.__isOperator(leftFormatted[i]):
                     if (leftFormatted[i] == '*') or (leftFormatted[i] == '/'):
                         mulDivOpe = True
                         break
             for i in range(0, lenElems):
-                if isOperator(leftFormatted[i]):
+                if self.__isOperator(leftFormatted[i]):
                     if (leftFormatted[i] == '*') or (leftFormatted[i] == '/') or (mulDivOpe == False):
                         currentOpe = leftFormatted[i - 1 : i + 2 : 1]
                         leftFormatted[i - 1] = self.__operations[currentOpe[1]](currentOpe[0], currentOpe[2])
@@ -298,12 +303,12 @@ class Equation:
         leftMember = ''
         rightMember = ''
         for elem in leftFormatted:
-            if isOperator(elem) == True:
+            if self.__isOperator(elem) == True:
                 leftMember += elem
             else:
                 leftMember += self.__toString(elem) 
         for elem in rightFormatted:
-            if isOperator(elem) == True:
+            if self.__isOperator(elem) == True:
                 rightMember += elem
             else:
                 rightMember += self.__toString(elem) 
@@ -314,7 +319,7 @@ class Equation:
         if len(member) > 0:
             eq = member
             # Split equation
-            for operator in OPERATORS:
+            for operator in self.__operators:
                 eq = eq.replace(operator, ' '+operator+' ')
             eq = eq.replace('^ + ', '^+')
             eq = eq.replace('^ - ', '^-')
@@ -328,7 +333,7 @@ class Equation:
             # Replace equation elements by list of integer
             for elem in equationElements:
                 value = elem
-                if isOperator(value) == False:
+                if self.__isOperator(value) == False:
                     value = self.__transformElementToValues(elem)
                 formattedMember.append(value)
         return formattedMember
@@ -336,7 +341,7 @@ class Equation:
     def __addStep(self, left:str, right:str):
         left = left.replace(' ', '')
         right = right.replace(' ', '')
-        for operator in OPERATORS:
+        for operator in self.__operators:
             left = left.replace(operator, ' '+operator+' ')
             right = right.replace(operator, ' '+operator+' ')
         if left[0] == ' ':
@@ -375,7 +380,7 @@ class Equation:
         else:
             self.__calcRoots()
             if (self.polynomialDegree == 0):
-                if (self.roots[0] != 0):
+                if (self.roots[0] != '0'):
                     self.sidesNotEquals = True
                 else:
                     self.allNumbersAsSolution = True
@@ -442,10 +447,13 @@ class Equation:
         else :
             self.roots = [c]
         for i in range(0, len(self.roots)):
-            self.roots[i] = str(self.roots[i]).replace('.0 ', ' ')
-            self.roots[i] = str(self.roots[i]).rstrip('0').rstrip('.')
-            self.roots[i] = str(self.roots[i]).replace('.0i', 'i')
-            self.roots[i] = '0' if str(self.roots[i]) == '-0' else self.roots[i]     
+            currentRoot = str(self.roots[i])
+            currentRoot = currentRoot.replace('.0 ', ' ')
+            currentRoot = currentRoot.rstrip('0').rstrip('.')
+            currentRoot = '0' if len(currentRoot) == 0 else currentRoot
+            currentRoot = currentRoot.replace('.0i', 'i')
+            currentRoot = '0' if currentRoot == '-0' else currentRoot
+            self.roots[i] = currentRoot
 
     def __add(self, src: dict, dest: dict):
         for key in dest:
@@ -583,3 +591,6 @@ class Equation:
         res['sidesNotEquals'] = self.sidesNotEquals,
         res['steps'] = self.steps
         return json.dumps(res)
+
+    def __isOperator(self, token):
+        return token in self.__operators

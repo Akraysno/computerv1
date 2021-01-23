@@ -4,8 +4,8 @@ from math import floor
 from fractions import Fraction
 from decimal import Decimal
 
-def printEquationResult(equation: Equation):
-    print('Equation           : '+equation.equation+'\n')
+def printEquationResult(equation: Equation, rawEquation: str):
+    print('Equation           : '+rawEquation+'\n')
     if equation.error:
         print(equation.error)
     else:
@@ -34,7 +34,7 @@ def printEquationResult(equation: Equation):
             elif len(equation.roots) == 2:
                 if equation.polynomialDegree == 2:
                     if equation.delta < 0:
-                        print("Le discriminant est négatif, l'équation a deux solutions complexe.")
+                        print("Le discriminant est négatif, l'équation a deux solutions complexes (ℂ).")
                     if equation.delta > 0:
                         print("Le discriminant est positif, l'équation à deux solutions.")
                 print('Les solutions sont : x1 = '+str(equation.roots[0]))
@@ -43,14 +43,15 @@ def printEquationResult(equation: Equation):
 def runEquation(equation:str):
     try:
         eq = Equation(equation)
-        printEquationResult(eq)
+        printEquationResult(eq, equation)
     except ValueError as err:
         print('Error : ' + err.args[0])
 
 def runRandomEquation():
     try:
-        eq = Equation(genretateRandomValidatedEquation())
-        printEquationResult(eq)
+        equation = genretateRandomValidatedEquation()
+        eq = Equation(equation)
+        printEquationResult(eq, equation)
     except ValueError as err:
         print('Error : ' + err.args[0])
 
