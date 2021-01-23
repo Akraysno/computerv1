@@ -418,7 +418,7 @@ class Equation:
                     if len(rootOne) > 0:
                         rootOne += ' '
                         rootOneSpaces = True
-                    elif rootOnePartTwoSign == '-':
+                    if (len(rootOne) > 0) or (rootOnePartTwoSign == '-'):
                         rootOne += rootOnePartTwoSign
                     if rootOneSpaces is True:
                         rootOne += ' '
@@ -429,7 +429,7 @@ class Equation:
                     if len(rootTwo) > 0:
                         rootTwo += ' '
                         rootTwoSpaces = True
-                    elif rootTwoPartTwoSign == '-':
+                    if (len(rootTwo) > 0) or (rootTwoPartTwoSign == '-'):
                         rootTwo += rootTwoPartTwoSign
                     if rootTwoSpaces is True:
                         rootTwo += ' '
