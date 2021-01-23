@@ -17,19 +17,26 @@ def printEquationResult(equation: Equation):
                     print('                     '+equation.steps[i])
             print('')
         print('Forme réduite      : '+equation.reduced+'\n')
-        print('Degré du polynome  : '+str(equation.polynomialDegre)+'\n')
-        if equation.polynomialDegreTooHigh is True:
+        print('Degré du polynome  : '+str(equation.polynomialDegree)+'\n')
+        if equation.polynomialDegreeTooHigh is True:
             print("Le degré du polynome est trop grand. Il doit être compris entre 0 et 2.")
         elif equation.sidesNotEquals is True:
             print("L'équation n'a pas de solution car les deux côtés de l'égalité ne sont pas égaux.")
         elif equation.allNumbersAsSolution is True: 
             print("Tous les nombres Réels (ℝ) sont solution")
         else:
-            if equation.polynomialDegre == 2:
-                print('Delta (𝚫)          : '+str(equation.delta).rstrip('0').rstrip('.')+'\n')
+            if equation.polynomialDegree == 2:
+                print('Discriminant (𝚫)   : '+str(equation.delta).rstrip('0').rstrip('.')+'\n')
             if len(equation.roots) == 1:
+                if (equation.polynomialDegree == 2) and (equation.delta == 0):
+                    print("Le discriminant est nul, l'équation n'a qu'une solution.")
                 print('La solution est    : x = '+str(equation.roots[0]))
             elif len(equation.roots) == 2:
+                if equation.polynomialDegree == 2:
+                    if equation.delta < 0:
+                        print("Le discriminant est négatif, l'équation a deux solutions complexe.")
+                    if equation.delta > 0:
+                        print("Le discriminant est positif, l'équation à deux solutions.")
                 print('Les solutions sont : x1 = '+str(equation.roots[0]))
                 print('                     x2 = '+str(equation.roots[1]))
 
